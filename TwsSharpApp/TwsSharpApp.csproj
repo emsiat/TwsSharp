@@ -55,6 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Tws\Contracts.cs" />
+    <Compile Include="Tws\Events\ErrorRecv_EventArgs.cs" />
+    <Compile Include="Tws\Events\HistoricalRecv_EventArgs.cs" />
+    <Compile Include="Tws\Events\RealtimeBarRecv_EventArgs.cs" />
+    <Compile Include="Tws\Events\SocketConnected_EventArgs.cs" />
+    <Compile Include="Tws\TwsWrapper_Interface.cs" />
+    <Compile Include="Tws\TwsWrapper.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -63,12 +70,22 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Infrastructure\Mvvm\Base_ViewModel.cs" />
+    <Compile Include="Infrastructure\Mvvm\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MainWindow\Main_View.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainWindow\Main_View.xaml.cs">
+      <DependentUpon>Main_View.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow\Main_ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -94,5 +111,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\TWS API\source\CSharpClient\client\CSharpAPI.csproj">
+      <Project>{8ede0744-96c2-40b0-a8dc-37df79370203}</Project>
+      <Name>CSharpAPI</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
