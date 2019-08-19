@@ -470,5 +470,18 @@ namespace TwsSharpApp
         {
             Debug.WriteLine("Order bound. Order Id: {0}, Api Client Id: {1}, Api Order Id: {2}", orderId, apiClientId, apiOrderId);
         }
+
+        public void completedOrder(Contract contract, Order order, OrderState orderState)
+        {
+            Debug.WriteLine("CompletedOrder. PermID: " + order.PermId + ", ParentPermId: " + Util.LongMaxString(order.ParentPermId) + ", Account: " + order.Account + ", Symbol: " + contract.Symbol + ", SecType: " + contract.SecType + 
+                " , Exchange: " + contract.Exchange + ", Action: " + order.Action + ", OrderType: " + order.OrderType + ", TotalQty: " + order.TotalQuantity + 
+                ", CashQty: " + order.CashQty + ", FilledQty: " + order.FilledQuantity + ", LmtPrice: " + order.LmtPrice + ", AuxPrice: " + order.AuxPrice + ", Status: " + orderState.Status +
+                ", CompletedTime: " + orderState.CompletedTime + ", CompletedStatus: " + orderState.CompletedStatus);
+        }
+
+        public void completedOrdersEnd()
+        {
+            Debug.WriteLine("CompletedOrdersEnd");
+        }
     }
 }

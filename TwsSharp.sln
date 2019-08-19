@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwsSharpApp", "TwsSharpApp\TwsSharpApp.csproj", "{7EC67BED-E0C4-4A9C-8FD3-DDDE0B070EF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203} = {8EDE0744-96C2-40B0-A8DC-37DF79370203}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAPI", "C:\TWS API\source\CSharpClient\client\CSharpAPI.csproj", "{8EDE0744-96C2-40B0-A8DC-37DF79370203}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +32,18 @@ Global
 		{7EC67BED-E0C4-4A9C-8FD3-DDDE0B070EF9}.Release|x64.Build.0 = Release|x64
 		{7EC67BED-E0C4-4A9C-8FD3-DDDE0B070EF9}.Release|x86.ActiveCfg = Release|x86
 		{7EC67BED-E0C4-4A9C-8FD3-DDDE0B070EF9}.Release|x86.Build.0 = Release|x86
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|x64.Build.0 = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|x86.Build.0 = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|x64.ActiveCfg = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|x64.Build.0 = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|x86.ActiveCfg = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
