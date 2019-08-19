@@ -1,6 +1,4 @@
-﻿using IBApi;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace TwsSharpApp
 {

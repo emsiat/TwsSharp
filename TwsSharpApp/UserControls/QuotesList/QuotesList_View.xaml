@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="TwsSharpApp.QuotesList_View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:TwsSharpApp"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <local:BoolNegatedToVisibility_Converter x:Key="BoolNegatedToVisibility_Converter1"/>
+        <local:BoolToVisibility_Converter        x:Key="BoolToVisibility_Converter1"/>
+    </UserControl.Resources>
+
+    <UserControl.Visibility>
+        <Binding Converter="{StaticResource BoolToVisibility_Converter1}" Path="IsTabSelected"/>
+    </UserControl.Visibility>
+
+    <Grid x:Name="gridMain">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView x:Name="lvQuotes" DataContext="{Binding}"
+                  VerticalAlignment="Stretch"            
+                  ItemsSource="{Binding QuotesListView, UpdateSourceTrigger=PropertyChanged}" 
+                  Width="{Binding ActualWidth, ElementName=gridMain, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                  SizeChanged="lvQuotes_SizeChanged">
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment"   Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" ItemHeight="{Binding ItemWidth}" ItemWidth="{Binding ItemWidth}"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+
+        </ListView>
+    </Grid>
+</UserControl>

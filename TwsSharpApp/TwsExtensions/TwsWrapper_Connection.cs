@@ -9,98 +9,18 @@ using System.Threading.Tasks;
 
 namespace TwsSharpApp
 {
-    public enum ReturnedCodes : int
-    {
-        None = 0,
-        HistoricalDataEndReceived,
-        BeginOfErrors,
-        HistoricalNoDataReceived,
-        BadSymbol,
-        ConnectionLost
-    }
-
     public partial class TwsWrapper : EWrapper
     {
-        public List<Bar> NewQuotesList = new List<Bar>();
-
-        private static int nextOrderId;
-        public ReturnedCodes TWSReturnedCode { get; set; } = ReturnedCodes.None;
-
         public TwsWrapper() : base()
         {
         }
-
-        public void ClearAll()
-        {
-            NewQuotesList.Clear();
-        }
-
-        //
-        // Historical Data
-        //
-#region Historical Data
-        public event EventHandler<HistoricalRecv_EventArgs> HistoricalDataReceived_Event;
-
-        public void historicalData(int reqId, Bar bar)
-        {
-            Debug.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
-
-            TWSReturnedCode = ReturnedCodes.None;
-
-            NewQuotesList.Add(bar);
-        }
-
-        public void historicalDataEnd(int reqId, string startDate, string endDate)
-        {
-            Debug.WriteLine("Historical data end - " + reqId + " from " + startDate + " to " + endDate);
-            TWSReturnedCode = ReturnedCodes.HistoricalDataEndReceived;
-
-            HistoricalDataReceived_Event?.Invoke(this, new HistoricalRecv_EventArgs(NewQuotesList));
-        }
-
-        public async Task PrevClose(string symbol)
-        {
-            string queryTime = DateTime.Today.AddDays(1).ToString("yyyyMMdd HH:mm:ss");
-            NewQuotesList.Clear();
-            ClientSocket.reqHistoricalData(nextValidId(), Contracts.USStock(symbol), queryTime, "2 D", "1 day", "TRADES", 1, 1, false, null);
-
-            await Task.CompletedTask;
-        }
-#endregion
-
-        //
-        // Real time data:
-        //
-#region Real time data
-        public async Task  StartRealtime(string symbol)
-        {
-            ClientSocket.reqRealTimeBars(nextValidId(), Contracts.USStock(symbol), 1, "TRADES", true, null);
-
-            await Task.CompletedTask;
-        }
-
-        public event EventHandler<RealtimeBarRecv_EventArgs> RealTimeDataEndReceived_Event;
-
-        public void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)
-        {
-            Bar recvBar = new Bar(UnixSecondsToEST(time, "o"/*"HH:mm:ss zzz"*/), open, high, low, close, volume, count, WAP);
-            RealTimeDataEndReceived_Event?.Invoke(this, new RealtimeBarRecv_EventArgs(recvBar));
-        }
-
-        private static TimeZoneInfo tst = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-        private DateTime firstUnixTime = new DateTime(1970, 1, 1, 0, 0, 0);
-
-        public string UnixSecondsToEST(long seconds, string format)
-        {
-            DateTime tstTime = TimeZoneInfo.ConvertTime(firstUnixTime.AddSeconds(seconds), TimeZoneInfo.Utc, tst);
-            return tstTime.ToString();
-        }
-        #endregion
 
         //
         // Handling Next Orderd ID
         //
 #region Handling Next Orderd ID
+        private static int nextOrderId;
+
         public int NextOrderId
         {
             get { return nextOrderId; }
@@ -126,7 +46,6 @@ namespace TwsSharpApp
         // Handling Client Socket
         //
 #region Handling Client Socket and Signal
-
         public event EventHandler<SocketConnected_EventArgs> SocketConnected_Event;
         static EClientSocket clientSocket = null;
         public EClientSocket ClientSocket
@@ -196,8 +115,9 @@ namespace TwsSharpApp
                 return signal;
             }
         }
-#endregion
+        #endregion
 
+        #region Receive Error Events
         public event EventHandler<ErrorRecv_EventArgs> ErrorReceived_Event;
 
         public virtual void error(string str)
@@ -211,5 +131,6 @@ namespace TwsSharpApp
             Debug.WriteLine("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg + "\n");
             ErrorReceived_Event?.Invoke(this, new ErrorRecv_EventArgs(new TwsError(id, errorCode, errorMsg)));
         }
+        #endregion
     }
 }

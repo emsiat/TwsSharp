@@ -30,5 +30,17 @@ namespace TwsSharpApp
             OnPropertyChanged(propertyName);
             return true;
         }
+
+        private string displayName;
+        public  string DisplayName
+        {
+            get { return displayName; }
+            set
+            {
+                if (displayName == value) return;
+                displayName = value;
+                OnPropertyChanged("DisplayName");
+            }
+        }
     }
 }
