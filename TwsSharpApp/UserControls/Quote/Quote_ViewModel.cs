@@ -1,4 +1,7 @@
-﻿namespace TwsSharpApp
+﻿using System;
+using System.Windows.Media;
+
+namespace TwsSharpApp
 {
     public class Quote_ViewModel : Workspace_ViewModel
     {
@@ -25,7 +28,13 @@
         private double lowValue = double.MaxValue;
         public  double LowValue
         {
-            get { return lowValue; }
+            get
+            {
+                if (lowValue == double.MaxValue) return 0;
+
+                return lowValue;
+            }
+
             set
             {
                 if (lowValue <= value) return;
@@ -46,24 +55,56 @@
             }
         }
 
-        private double latest = 0;
+        private double previous = 0;
+        private double latest = double.NaN;
         public  double Latest
         {
             get { return latest; }
             set
             {
                 if (latest == value) return;
+                previous = latest;
                 latest = value;
                 OnPropertyChanged(nameof(Latest));
 
                 // Also bind the Var property:
-                OnPropertyChanged(nameof(Var));
+                Var = 100 * (Latest - PrevClose) / PrevClose;
+                IsDefined = !(double.IsNaN(latest));
+
+                OnPropertyChanged(nameof(Background_TickVariation));
             }
         }
 
+        private bool isDefined = false;
+        public  bool IsDefined
+        {
+            get { return isDefined; }
+            set
+            {
+                if (isDefined == value) return;
+                isDefined = value;
+                OnPropertyChanged(nameof(IsDefined));
+            }
+        }
+
+
+        private double var = 0;
         public  double Var
         {
-            get { return Latest - PrevClose; }
+            get { return var; }
+            set
+            {
+                if (var == value) return;
+                bool isColorChanging = (Math.Sign(var) != Math.Sign(value));
+
+                var = value;
+
+                if (isColorChanging)
+                {
+                    OnPropertyChanged(nameof(Background_DailyVariation));
+                }
+                OnPropertyChanged(nameof(Var));
+            }
         }
 
         private string time;
@@ -75,6 +116,32 @@
                 if (time == value) return;
                 time = value;
                 OnPropertyChanged(nameof(Time));
+            }
+        }
+
+        public Color Background_DailyVariation
+        {
+            get
+            {
+                if (Var < 0)
+                    return Colors.Firebrick;
+                else if (Var > 0)
+                    return Colors.DarkGreen;
+                else
+                    return Colors.DimGray;
+            }
+        }
+
+        public Color Background_TickVariation
+        {
+            get
+            {
+                if (latest - previous < 0)
+                    return Colors.LightPink;
+                else if (latest - previous > 0)
+                    return Colors.LightGreen;
+                else
+                    return Colors.White;
             }
         }
     }

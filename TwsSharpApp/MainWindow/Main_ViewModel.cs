@@ -132,16 +132,14 @@ namespace TwsSharpApp
 
             tab.AddNewQuote("QCOM");
             tab.AddNewQuote("AVGO");
-            //tab.AddNewQuote("INTC");
-            //tab.AddNewQuote("MSFT");
-            //tab.AddNewQuote("IBM");
-            //tab.AddNewQuote("AVGO");
-            //tab.AddNewQuote("VOD");
-            //tab.AddNewQuote("T");
-            //tab.AddNewQuote("NOK");
-            //tab.AddNewQuote("OXLC");
-            //tab.AddNewQuote("BABA");
-            //tab.AddNewQuote("RY");
+            tab.AddNewQuote("INTC");
+            tab.AddNewQuote("MSFT");
+            tab.AddNewQuote("IBM");
+            tab.AddNewQuote("AVGO");
+            tab.AddNewQuote("NOK");
+            tab.AddNewQuote("OXLC");
+            tab.AddNewQuote("BABA");
+            tab.AddNewQuote("RY");
 
             await Task.CompletedTask;
         }

@@ -10,6 +10,13 @@
     <UserControl.Resources>
         <local:BoolNegatedToVisibility_Converter x:Key="BoolNegatedToVisibility_Converter1"/>
         <local:BoolToVisibility_Converter        x:Key="BoolToVisibility_Converter1"/>
+
+        <DataTemplate x:Key="QuoteItemTemplate">
+            <Viewbox Stretch="Fill" >
+                <local:Quote_View />
+            </Viewbox>
+        </DataTemplate>
+
     </UserControl.Resources>
 
     <UserControl.Visibility>
@@ -29,8 +36,10 @@
                   VerticalAlignment="Stretch"            
                   ItemsSource="{Binding QuotesListView, UpdateSourceTrigger=PropertyChanged}" 
                   Width="{Binding ActualWidth, ElementName=gridMain, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
-                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
-                  SizeChanged="lvQuotes_SizeChanged">
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                  SizeChanged="lvQuotes_SizeChanged" 
+                  ItemTemplate="{StaticResource QuoteItemTemplate}">
 
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

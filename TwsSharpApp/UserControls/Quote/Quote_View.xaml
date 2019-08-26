@@ -3,41 +3,127 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:TwsSharpApp" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" >
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <UserControl.Resources>
+        <local:BoolToVisibility_Converter x:Key="BoolToVisibility_Converter"/>
+        <Style x:Key="Style_QuoteView_Symbol" TargetType="{x:Type TextBlock}">
+            <Setter Property="TextWrapping"        Value="NoWrap"/>
+            <Setter Property="TextTrimming"        Value="None"/>
+            <Setter Property="Margin"              Value="5,2" />
+            <Setter Property="Foreground"          Value="White" />
+            <Setter Property="FontSize"            Value="10" />
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Style x:Key="Style_QuoteView_Price" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Style_QuoteView_Symbol}">
+            <Setter Property="FontSize"            Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Symbol}" />
+        <Style x:Key="Style_QuoteView_Misc" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Style_QuoteView_Symbol}">
+            <Setter Property="FontSize"            Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin"              Value="5,0" />
+        </Style>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Last: " />
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Latest, FallbackValue=0, TargetNullValue=''}" />
+        <Style x:Key="Style_QuoteView_Label" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Style_QuoteView_Symbol}">
+            <Setter Property="FontSize"            Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin"              Value="0" />
+            <Setter Property="Opacity"             Value="0.5" />
+        </Style>
+    </UserControl.Resources>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Var: " />
-        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Var, StringFormat=\{0:F2\}}" />
+    <Border Margin="0" CornerRadius="4" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                       Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" >
+        <Border.Background >
+            <SolidColorBrush x:Name="Background_DailyVar" Color="{Binding Background_DailyVariation}" />
+        </Border.Background>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Low: " />
-        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LowValue}" />
+        <Grid >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="High: " />
-        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding HighValue}" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"  MinHeight="9" />
+                <RowDefinition Height="2*" MinHeight="9" />
+                <RowDefinition Height="*"  MinHeight="9" />
+                <RowDefinition Height="*"  MinHeight="9" />
+                <RowDefinition Height="*"  MinHeight="9" />
+                <RowDefinition Height="*"  MinHeight="9" />
+            </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Time: " />
-        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Time}" />
-    </Grid>
-    
+            <FrameworkElement Visibility="Hidden" DataContext="{Binding Background_DailyVariation, NotifyOnTargetUpdated=True}">
+                <FrameworkElement.Triggers>
+                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="Background_DailyVar"
+                                                 Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:1"
+                                                 AutoReverse="False" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </FrameworkElement.Triggers>
+            </FrameworkElement>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                       Text="{Binding Symbol}" 
+                       Style="{DynamicResource Style_QuoteView_Symbol}" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="{Binding Latest, NotifyOnTargetUpdated=True, StringFormat=\{0:#\,##0.00\}}" 
+                       Style="{DynamicResource Style_QuoteView_Price}" ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+
+                <TextBlock.Foreground>
+                    <SolidColorBrush x:Name="Foreground_TickVariation" Color="{Binding Background_TickVariation}" />
+                </TextBlock.Foreground>
+
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(Brush.Opacity)" 
+                                                 From="0.0" To="1.0" Duration="0:0:1"
+                                                 AutoReverse="False" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                       Style="{DynamicResource Style_QuoteView_Misc}" 
+                       Text="{Binding Var, StringFormat=\{0:\+0.00;-0.00;0\}%}" 
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Style="{DynamicResource Style_QuoteView_Label}"
+                       Text="Lo:"
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+            <TextBlock Grid.Row="3" Grid.Column="1"
+                       Style="{DynamicResource Style_QuoteView_Misc}"
+                       Text="{Binding LowValue, StringFormat=\{0:#\,##0.00\}}"
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+            <TextBlock Grid.Row="4" Grid.Column="0" 
+                       Style="{DynamicResource Style_QuoteView_Label}"
+                       Text="Hi:"
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+            <TextBlock Grid.Row="4" Grid.Column="1"
+                       Style="{DynamicResource Style_QuoteView_Misc}"
+                       Text="{Binding HighValue, StringFormat=\{0:#\,##0.00\}}"
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                       Style="{DynamicResource Style_QuoteView_Label}"
+                       Text="{Binding Time, StringFormat=\{0:HH:mm:ss\}}" Margin="5,0,5,2"
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+        </Grid>
+    </Border>
 </UserControl>

@@ -43,7 +43,7 @@ namespace TwsSharpApp
                 foreach(Quote_ViewModel smbVM in QuotesList)
                 {
                     await Main_ViewModel.DataFeeder.GetStockContract(smbVM.Symbol);
-                    await Task.Delay(500);
+                    await Task.Delay(1000);
                 }
             }
         }
@@ -66,7 +66,7 @@ namespace TwsSharpApp
             }
         }
 
-        private void DataFeeder_HistoricalDataReceived_Event(object sender, HistoricalRecv_EventArgs e)
+        private async void DataFeeder_HistoricalDataReceived_Event(object sender, HistoricalRecv_EventArgs e)
         {
             // Historical data list is empty, just return:
             if (e.HistoricalList == null) return;
@@ -96,6 +96,19 @@ namespace TwsSharpApp
             }
 
             symbVM.Time = time.ToShortDateString();
+
+            //bool isThick = false;
+            //while(true)
+            //{
+            //    await Task.Delay(5000);
+            //    if(isThick)
+            //        --symbVM.Latest;
+            //    else
+            //        ++symbVM.Latest;
+
+            //    isThick = !isThick;
+            //}
+            await Task.CompletedTask;
         }
 
         private void DataFeeder_RealTimeDataEndReceived_Event(object sender, RealtimeBarRecv_EventArgs e)
@@ -103,11 +116,12 @@ namespace TwsSharpApp
             // a real time bar has been received:
             int reqId = e.RequestId;
             Quote_ViewModel symbVM = SymbolsList[reqId];
+            DateTime time = DateTime.Parse(e.RealtimeBar.Time);
 
             symbVM.LowValue  = e.RealtimeBar.Low;
             symbVM.HighValue = e.RealtimeBar.High;
             symbVM.Latest    = e.RealtimeBar.Close;
-            symbVM.Time      = e.RealtimeBar.Time;
+            symbVM.Time      = time.ToString("HH:mm:ss");
         }
 
         public void AddNewQuote(string symbol)
@@ -146,7 +160,7 @@ namespace TwsSharpApp
 
         private double height = 0;
         private double width  = 0;
-        private static double maxWidth = 200;
+        private static double maxWidth = 150;
 
         public void ChangeDimensions(double h, double w)
         {
