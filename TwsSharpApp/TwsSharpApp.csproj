@@ -103,6 +103,11 @@
       <DependentUpon>Main_View.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow\Main_ViewModel.cs" />
+    <Compile Include="UserControls\Contract\ContractDetails_ViewModel.cs" />
+    <Compile Include="UserControls\QuotesList\AddSymbol\AddSymbol_View.xaml.cs">
+      <DependentUpon>AddSymbol_View.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\QuotesList\AddSymbol\AddSymbol_ViewModel.cs" />
     <Compile Include="UserControls\QuotesList\QuotesList_View.xaml.cs">
       <DependentUpon>QuotesList_View.xaml</DependentUpon>
     </Compile>
@@ -131,6 +136,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="MainWindow\Main_View.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\ColorsAndBrushes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="UserControls\QuotesList\AddSymbol\AddSymbol_View.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

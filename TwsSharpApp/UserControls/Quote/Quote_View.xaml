@@ -21,6 +21,7 @@
         <Style x:Key="Style_QuoteView_Price" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Style_QuoteView_Symbol}">
             <Setter Property="FontSize"            Value="13" />
             <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontWeight"          Value="Bold" />
         </Style>
 
         <Style x:Key="Style_QuoteView_Misc" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Style_QuoteView_Symbol}">
@@ -37,7 +38,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Margin="0" CornerRadius="4" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+    <Border Margin="0" CornerRadius="{StaticResource Main.CornerRadius}" ScrollViewer.VerticalScrollBarVisibility="Disabled"
                        Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" >
         <Border.Background >
             <SolidColorBrush x:Name="Background_DailyVar" Color="{Binding Background_DailyVariation}" />
@@ -81,7 +82,7 @@
                        Style="{DynamicResource Style_QuoteView_Price}" ScrollViewer.VerticalScrollBarVisibility="Disabled" >
 
                 <TextBlock.Foreground>
-                    <SolidColorBrush x:Name="Foreground_TickVariation" Color="{Binding Background_TickVariation}" />
+                    <SolidColorBrush Color="{Binding Background_TickVariation}" />
                 </TextBlock.Foreground>
 
                 <TextBlock.Triggers>

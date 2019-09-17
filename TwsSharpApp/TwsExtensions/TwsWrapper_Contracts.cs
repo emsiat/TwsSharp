@@ -12,15 +12,17 @@ namespace TwsSharpApp
     {
         private Dictionary<int, List<ContractDetails>> contractsList = new Dictionary<int, List<ContractDetails>>();
 
-        public async Task GetStockContract(string symbol)
+        //
+        // Request Contract Details about a stock symbol:
+        //
+        public void RequestContractDetails_Stock(string symbol)
         {
-            //Require Contract Details about a stock symbol:
             ClientSocket.reqContractDetails(nextValidId(), new Contract() {Symbol = symbol, SecType  = "STK" });
-
-            await Task.CompletedTask;
         }
 
+        public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsEndReceived_Event;
         public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsReceived_Event;
+
         public virtual void contractDetails(int reqId, ContractDetails contractDetails)
         {
             //Debug.WriteLine("ContractDetails begin. ReqId: " + reqId);
@@ -33,13 +35,14 @@ namespace TwsSharpApp
                 contractsList.Add(reqId, new List<ContractDetails>());
             }
 
+            ContractDetailsReceived_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(reqId, contractDetails));
             contractsList[reqId].Add(contractDetails);
         }
 
         public virtual void contractDetailsEnd(int reqId)
         {
             Debug.WriteLine("ContractDetailsEnd. " + reqId + "\n");
-            ContractDetailsReceived_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(reqId, contractsList[reqId][0]));
+            ContractDetailsEndReceived_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(reqId, contractsList[reqId][0]));
 
             contractsList.Remove(reqId);
         }

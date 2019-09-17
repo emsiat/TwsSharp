@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:TwsSharpApp"
-             mc:Ignorable="d" Background="DimGray"
+             mc:Ignorable="d" Background="{StaticResource Main.Static.Background.Brush}"
              d:DesignHeight="450" d:DesignWidth="800" 
              Loaded="UserControl_Loaded" >
 
@@ -70,7 +70,7 @@
                 </ItemsControl>
 
                 <ScrollViewer Grid.Row="1">
-                    <TextBlock Grid.Row="1" Text="{Binding Error}" />
+                    <TextBlock Grid.Row="1" Text="{Binding Error}" Foreground="{StaticResource Main.Static.Foreground.Brush}" />
                 </ScrollViewer>
             </Grid>
         </Border>

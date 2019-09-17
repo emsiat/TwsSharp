@@ -1,6 +1,8 @@
 ﻿using IBApi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TwsSharpApp
@@ -35,18 +37,33 @@ namespace TwsSharpApp
             historicData[reqId].Add(bar);
         }
 
+        public void CancelHistoricalData(int reqId)
+        {
+            ClientSocket.cancelHistoricalData(reqId);
+        }
+
         public void historicalDataEnd(int reqId, string startDate, string endDate)
         {
             HistoricalDataReceived_Event?.Invoke(this, new HistoricalRecv_EventArgs(reqId, historicData[reqId]));
             historicData.Remove(reqId);
         }
 
-        public async Task<int> PrevClose(Contract contract)
+        public async Task<int> RequestPrev2Closes(Contract contract)
         {
             string queryTime = DateTime.Today.AddDays(1).ToString("yyyyMMdd HH:mm:ss");
 
             ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, "2 D", "1 day", "TRADES", 1, 1, false, null);
 
+            await Task.CompletedTask;
+            return NextOrderId;
+        }
+
+        public async Task<int> RequestLatestClose(Contract contract)
+        {
+            string queryTime = DateTime.Today.AddDays(1).ToString("yyyyMMdd HH:mm:ss");
+
+            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, "1 D", "1 day", "TRADES", 1, 1, false, null);
+            
             await Task.CompletedTask;
             return NextOrderId;
         }
@@ -62,6 +79,11 @@ namespace TwsSharpApp
             await Task.CompletedTask;
 
             return NextOrderId;
+        }
+
+        public void CancelRealTime(int tickerId)
+        {
+            ClientSocket.cancelRealTimeBars(tickerId);
         }
 
         public event EventHandler<RealtimeBarRecv_EventArgs> RealTimeDataEndReceived_Event;

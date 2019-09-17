@@ -1,0 +1,34 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Main Window -->
+    <Color x:Key="Main.Static.Background.Color">#222222</Color>
+    <Color x:Key="Main.Static.Foreground.Color">#E0E0E0</Color>
+    <SolidColorBrush x:Key="Main.Static.Background.Brush" Color="{StaticResource Main.Static.Background.Color}" />
+    <SolidColorBrush x:Key="Main.Static.Foreground.Brush" Color="{StaticResource Main.Static.Foreground.Color}" />
+
+    <CornerRadius x:Key="Main.CornerRadius">2</CornerRadius>
+
+    <!-- Toolbar -->
+    <Color x:Key="Toolbar.Static.Foreground.Color">#cccccc</Color>
+    <Color x:Key="Toolbar.Static.Background.Color">#1A1A1A</Color>
+
+    <SolidColorBrush x:Key="Toolbar.Static.Foreground.Brush" Color="{StaticResource Toolbar.Static.Foreground.Color}" />
+    <SolidColorBrush x:Key="Toolbar.Static.Background.Brush" Color="{StaticResource Toolbar.Static.Background.Color}" />
+
+    <SolidColorBrush x:Key="Toolbar.MouseOver.Background.Brush" Color="Transparent"/>
+    <SolidColorBrush x:Key="Toolbar.MouseOver.Foreground.Brush" Color="White"/>
+
+    <SolidColorBrush x:Key="Toolbar.Pressed.Background.Brush" Color="#555"/>
+    <SolidColorBrush x:Key="Toolbar.Pressed.Border.Brush"     Color="#555"/>
+    
+    <!-- Quote View -->
+    <Color x:Key="Color.Var.Daily.Backgroud.Positive">DarkGreen</Color>
+    <Color x:Key="Color.Var.Daily.Backgroud.Negative">Firebrick</Color>
+    <Color x:Key="Color.Var.Daily.Backgroud.Zero">#333</Color>
+
+    <Color x:Key="Color.Var.Tick.Backgroud.Positive">LightGreen</Color>
+    <Color x:Key="Color.Var.Tick.Backgroud.Negative">#FFB0A0</Color>
+    <Color x:Key="Color.Var.Tick.Backgroud.Zero">White</Color>
+
+</ResourceDictionary>

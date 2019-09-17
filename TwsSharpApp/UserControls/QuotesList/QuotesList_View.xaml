@@ -23,8 +23,10 @@
         <Binding Converter="{StaticResource BoolToVisibility_Converter1}" Path="IsTabSelected"/>
     </UserControl.Visibility>
 
-    <Grid x:Name="gridMain">
+    <Grid x:Name="gridMain" Margin="5,0,0,0">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -32,14 +34,34 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <ListView x:Name="lvQuotes" DataContext="{Binding}"
-                  VerticalAlignment="Stretch"            
+        <Border Grid.Row="1" CornerRadius="2"  Margin="5,5" Background="Transparent">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="5s RealTime Quotes" Margin="0,5,100,5" Foreground="LightGray" FontSize="20"/>
+
+                <Button Grid.Column="1" Content=" + Symbol " ToolTip="Add New Symbol"
+                        Height="24" Margin="2,0" Command="{Binding ShowAddSymbolCommand}"
+                        FontWeight="Bold" />
+
+            </Grid>
+        </Border>
+
+        <ListView x:Name="lvQuotes" Grid.Row="2" DataContext="{Binding}"
+                  VerticalAlignment="Stretch"
                   ItemsSource="{Binding QuotesListView, UpdateSourceTrigger=PropertyChanged}" 
                   Width="{Binding ActualWidth, ElementName=gridMain, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
                   ScrollViewer.VerticalScrollBarVisibility="Disabled" 
                   SizeChanged="lvQuotes_SizeChanged" 
-                  ItemTemplate="{StaticResource QuoteItemTemplate}">
+                  ItemTemplate="{StaticResource QuoteItemTemplate}"
+                  Visibility="{Binding AddSymbol_VM.IsVisible, Converter={StaticResource BoolNegatedToVisibility_Converter1}}"
+                  >
 
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
@@ -55,5 +77,9 @@
             </ListView.ItemsPanel>
 
         </ListView>
+
+        <local:AddSymbol_View x:Name="addSymbolView" Grid.Row="2" DataContext="{Binding AddSymbol_VM}" 
+                              Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility_Converter1}}" />
+
     </Grid>
 </UserControl>

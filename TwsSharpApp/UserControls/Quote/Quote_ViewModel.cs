@@ -1,15 +1,21 @@
-﻿using System;
+﻿using IBApi;
+using System;
+using System.Windows;
 using System.Windows.Media;
 
 namespace TwsSharpApp
 {
     public class Quote_ViewModel : Workspace_ViewModel
     {
-        public string Symbol { get; set; }
+        public string Symbol { get { return contractDetails.Contract.Symbol; } }
+        public int ReqId { get; set; }
 
-        public Quote_ViewModel(string symb)
+        ContractDetails contractDetails { get; set; }
+
+        public Quote_ViewModel(int reqId, ContractDetails cDetails)
         {
-            Symbol = symb;
+            ReqId  = reqId;
+            contractDetails = cDetails;
             IsTabSelected = true;
         }
 
@@ -119,29 +125,37 @@ namespace TwsSharpApp
             }
         }
 
+        Color Color_Var_Daily_Backgroud_Positive = (Color)Application.Current.Resources["Color.Var.Daily.Backgroud.Positive"];
+        Color Color_Var_Daily_Backgroud_Negative = (Color)Application.Current.Resources["Color.Var.Daily.Backgroud.Negative"];
+        Color Color_Var_Daily_Backgroud_Zero     = (Color)Application.Current.Resources["Color.Var.Daily.Backgroud.Zero"];
+
         public Color Background_DailyVariation
         {
             get
             {
                 if (Var < 0)
-                    return Colors.Firebrick;
+                    return Color_Var_Daily_Backgroud_Negative;
                 else if (Var > 0)
-                    return Colors.DarkGreen;
+                    return Color_Var_Daily_Backgroud_Positive;
                 else
-                    return Colors.DimGray;
+                    return Color_Var_Daily_Backgroud_Zero;
             }
         }
+
+        Color Color_Var_Tick_Backgroud_Positive = (Color)Application.Current.Resources["Color.Var.Tick.Backgroud.Positive"];
+        Color Color_Var_Tick_Backgroud_Negative = (Color)Application.Current.Resources["Color.Var.Tick.Backgroud.Negative"];
+        Color Color_Var_Tick_Backgroud_Zero     = (Color)Application.Current.Resources["Color.Var.Tick.Backgroud.Zero"];
 
         public Color Background_TickVariation
         {
             get
             {
                 if (latest - previous < 0)
-                    return Colors.LightPink;
+                    return Color_Var_Tick_Backgroud_Negative;
                 else if (latest - previous > 0)
-                    return Colors.LightGreen;
+                    return Color_Var_Tick_Backgroud_Positive;
                 else
-                    return Colors.White;
+                    return Color_Var_Tick_Backgroud_Zero;
             }
         }
     }

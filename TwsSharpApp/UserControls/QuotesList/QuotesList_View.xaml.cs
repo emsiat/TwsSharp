@@ -16,7 +16,11 @@ namespace TwsSharpApp
         private void lvQuotes_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             QuotesList_ViewModel vm = DataContext as QuotesList_ViewModel;
-            if(vm != null) vm.ChangeDimensions(e.NewSize.Height, e.NewSize.Width);
+            if(vm != null)
+            {
+                vm.Dispatcher = this.Dispatcher;
+                vm.ChangeDimensions(e.NewSize.Height, e.NewSize.Width);
+            }
         }
     }
 }
