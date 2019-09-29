@@ -6,7 +6,24 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Shared Resources -->
                 <ResourceDictionary Source="Resources\ColorsAndBrushes.xaml" />
+                <ResourceDictionary Source="Resources\Misc.xaml" />
+                
+                <!-- Buttons -->
+                <ResourceDictionary Source="Resources\ButtonToolbar_Style.xaml" />
+                <ResourceDictionary Source="Resources\ButtonSearch_Style.xaml" />
+                <ResourceDictionary Source="Resources\ButtonClose_Style.xaml" />
+
+                <!-- ListView -->
+                <ResourceDictionary Source="Resources\ListView\ListView_Style.xaml" />
+                <ResourceDictionary Source="Resources\ListView\ListViewItem_Style.xaml" />
+                <ResourceDictionary Source="Resources\ListView\ListViewItemLeftMenu_Style.xaml" />
+                <ResourceDictionary Source="Resources\ListView\ListViewItemLeftMenu_Template.xaml" />
+
+                <!-- TextBlock -->
+                <ResourceDictionary Source="Resources\TextBlock_Style.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 

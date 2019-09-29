@@ -36,16 +36,19 @@
 
         <Button Grid.Column="2" Grid.Row="1" Content="Cancel"  
                 Command="{Binding CancelSearch_Command}"
+                Style="{StaticResource ButtonSearch_Style}" 
                 Visibility="{Binding IsSearchingInProgress, Converter={StaticResource BoolToVisibility_Converter}}" 
                 />
 
         <Button Grid.Column="3" Grid.Row="1" Content="Search"  
                 Command="{Binding StartSearch_Command}"
+                Style="{StaticResource ButtonSearch_Style}" 
                 IsEnabled="{Binding IsNotSearchingInProgress}"
                 />
 
-        <Button Grid.Column="4" Grid.Row="1" Content="Close" 
+        <Button Grid.Column="4" Grid.Row="1"
                 Command="{Binding CloseCommand}" 
+                Style="{StaticResource ButtonClose_Style}" 
                 IsEnabled="{Binding IsNotSearchingInProgress}"
                 />
 

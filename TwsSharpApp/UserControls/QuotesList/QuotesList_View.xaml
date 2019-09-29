@@ -43,11 +43,11 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Text="5s RealTime Quotes" Margin="0,5,100,5" Foreground="LightGray" FontSize="20"/>
+                <TextBlock Grid.Column="0" Text="5s RealTime Quotes" Style="{DynamicResource TextBlockH1_Style}"/>
 
                 <Button Grid.Column="1" Content=" + Symbol " ToolTip="Add New Symbol"
-                        Height="24" Margin="2,0" Command="{Binding ShowAddSymbolCommand}"
-                        FontWeight="Bold" />
+                        Style="{StaticResource ButtonToolbar_Style}" 
+                        Command="{Binding ShowAddSymbolCommand}"/>
 
             </Grid>
         </Border>
@@ -62,13 +62,6 @@
                   ItemTemplate="{StaticResource QuoteItemTemplate}"
                   Visibility="{Binding AddSymbol_VM.IsVisible, Converter={StaticResource BoolNegatedToVisibility_Converter1}}"
                   >
-
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="VerticalContentAlignment"   Value="Stretch"/>
-                </Style>
-            </ListView.ItemContainerStyle>
 
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

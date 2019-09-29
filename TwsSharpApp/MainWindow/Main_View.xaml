@@ -31,14 +31,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Column="0" Grid.Row="0">
-            <ListView ItemsSource="{Binding}" DataContext="{Binding CommandsCollection}" >
-                
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="IsSelected" Value="{Binding IsTabSelected}" />
-                    </Style>
-                </ListView.ItemContainerStyle>
+        <Border Grid.Column="0" Grid.Row="0" Padding="0,10,0,0">
+            <ListView ItemsSource        ="{Binding}" 
+                      DataContext        ="{Binding CommandsCollection}" 
+                      ItemContainerStyle ="{DynamicResource ListViewItemLeftMenu_Style}" 
+                      Template           ="{DynamicResource ListViewItemLeftMenu_Template}">
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -47,14 +44,15 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="0" Text="{Binding DisplayName}" 
+                                       Style="{DynamicResource TextBlockLeftMenu_Style}" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
         </Border>
 
-        <Border Grid.Column="1" Grid.Row="0">
+        <Border Grid.Column="1" Grid.Row="0" Background="{DynamicResource Workspaces.Background.Brush}" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -70,7 +68,7 @@
                 </ItemsControl>
 
                 <ScrollViewer Grid.Row="1">
-                    <TextBlock Grid.Row="1" Text="{Binding Error}" Foreground="{StaticResource Main.Static.Foreground.Brush}" />
+                    <TextBlock Grid.Row="1" Text="{Binding Error}" Foreground="{DynamicResource Main.Static.Foreground.Brush}" />
                 </ScrollViewer>
             </Grid>
         </Border>

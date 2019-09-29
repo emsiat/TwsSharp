@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Main Window -->
-    <Color x:Key="Main.Static.Background.Color">#222222</Color>
+    <Color x:Key="Main.Static.Background.Color">#262e3a</Color>
     <Color x:Key="Main.Static.Foreground.Color">#E0E0E0</Color>
     <SolidColorBrush x:Key="Main.Static.Background.Brush" Color="{StaticResource Main.Static.Background.Color}" />
     <SolidColorBrush x:Key="Main.Static.Foreground.Brush" Color="{StaticResource Main.Static.Foreground.Color}" />
@@ -10,7 +10,7 @@
     <CornerRadius x:Key="Main.CornerRadius">2</CornerRadius>
 
     <!-- Toolbar -->
-    <Color x:Key="Toolbar.Static.Foreground.Color">#cccccc</Color>
+    <Color x:Key="Toolbar.Static.Foreground.Color">#2f80ed</Color>
     <Color x:Key="Toolbar.Static.Background.Color">#1A1A1A</Color>
 
     <SolidColorBrush x:Key="Toolbar.Static.Foreground.Brush" Color="{StaticResource Toolbar.Static.Foreground.Color}" />
@@ -30,5 +30,26 @@
     <Color x:Key="Color.Var.Tick.Backgroud.Positive">LightGreen</Color>
     <Color x:Key="Color.Var.Tick.Backgroud.Negative">#FFB0A0</Color>
     <Color x:Key="Color.Var.Tick.Backgroud.Zero">White</Color>
+    
+    <!-- H1 -->
+    <Color x:Key="H1.Background.Color">#222222</Color>
+    <Color x:Key="H1.Foreground.Color">LightBlue</Color>
+    <SolidColorBrush x:Key="H1.Background.Brush" Color="{StaticResource H1.Background.Color}" />
+    <SolidColorBrush x:Key="H1.Foreground.Brush" Color="{StaticResource H1.Foreground.Color}" />
+
+    <!-- Workspaces -->
+    <Color x:Key="Workspaces.Background.Color">#151b24</Color>
+    <SolidColorBrush x:Key="Workspaces.Background.Brush" Color="{StaticResource Workspaces.Background.Color}" />
+    
+    <!-- LeftMenu -->
+    <Color x:Key="LeftMenu.Background.Color">#222222</Color>
+    <Color x:Key="LeftMenu.Foreground.Color">Orange</Color>
+    <SolidColorBrush x:Key="LeftMenu.Background.Brush" Color="{StaticResource LeftMenu.Background.Color}" />
+    <SolidColorBrush x:Key="LeftMenu.Foreground.Brush" Color="{StaticResource LeftMenu.Foreground.Color}" />
+
+    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0" x:Key="LeftMenu.SelectedItem.Brush">
+        <GradientStop Offset="0.3" Color="{StaticResource Main.Static.Background.Color}"/>
+        <GradientStop Offset="0.9" Color="{StaticResource Workspaces.Background.Color}"/>
+    </LinearGradientBrush>
 
 </ResourceDictionary>

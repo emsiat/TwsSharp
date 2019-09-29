@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwsSharpApp"
         mc:Ignorable="d"
-        Title="TwsSharpApp" Height="450" Width="800" FontFamily="Courier New" FontSize="14">
+        Title="TwsSharpApp" Height="450" Width="800" 
+        FontFamily="{DynamicResource Font_App}" FontSize="{DynamicResource FontSize_App}">
 
     <local:Main_View/>
 
