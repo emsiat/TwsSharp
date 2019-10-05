@@ -11,130 +11,144 @@
         <local:BoolToVisibility_Converter x:Key="BoolToVisibility_Converter"/>
         <local:BoolNegatedToVisibility_Converter x:Key="BoolNegatedToVisibility_Converter_1"/>
     </UserControl.Resources>
-    
-    <Grid Background="DarkGray">
+
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"  />
+            <RowDefinition Height="18*" />
+            <RowDefinition Height="*"  />
         </Grid.RowDefinitions>
-        
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*"  />
+            <ColumnDefinition Width="18*" />
+            <ColumnDefinition Width="*"  />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.ColumnSpan="5"  Text="Select a contract to add new symbol" />
-        
-        <TextBlock Grid.Column="0" Grid.Row="1" Text="Search for symbol:" VerticalAlignment="Center" />
-        <TextBox   Grid.Column="1" Grid.Row="1" Text="{Binding Symbol}"   Width="100" VerticalContentAlignment="Center"/>
+        <Border Grid.Column="1" Grid.Row="1" Padding="10" CornerRadius="5" Background="{StaticResource Main.Dialog.Background.Brush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-        <Button Grid.Column="2" Grid.Row="1" Content="Cancel"  
-                Command="{Binding CancelSearch_Command}"
-                Style="{StaticResource ButtonSearch_Style}" 
-                Visibility="{Binding IsSearchingInProgress, Converter={StaticResource BoolToVisibility_Converter}}" 
-                />
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <Button Grid.Column="3" Grid.Row="1" Content="Search"  
-                Command="{Binding StartSearch_Command}"
-                Style="{StaticResource ButtonSearch_Style}" 
-                IsEnabled="{Binding IsNotSearchingInProgress}"
-                />
+                <TextBlock Grid.ColumnSpan="6" Text="Select a contract to add new symbol" />
+                <Button Grid.Column="6"
+                        Command="{Binding CloseCommand}" 
+                        Style="{StaticResource ButtonClose_Style}"  />
 
-        <Button Grid.Column="4" Grid.Row="1"
-                Command="{Binding CloseCommand}" 
-                Style="{StaticResource ButtonClose_Style}" 
-                IsEnabled="{Binding IsNotSearchingInProgress}"
-                />
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Search for symbol:" VerticalAlignment="Center" />
+                <TextBox   Grid.Column="1" Grid.Row="1" Text="{Binding Symbol}"   Width="100" VerticalContentAlignment="Center"/>
 
-        <DataGrid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="6"
-                  ItemsSource="{Binding Contracts_ListView, UpdateSourceTrigger=PropertyChanged}" 
-                  SelectedValue="{Binding SelectedReqId}" SelectedValuePath="ReqId"
-                  CanUserAddRows="False" IsReadOnly="True" CanUserSortColumns="False" AutoGenerateColumns="False" >
+                <Button Grid.Column="2" Grid.Row="1" Content="Cancel"  
+                        Command="{Binding CancelSearch_Command}"
+                        Style="{StaticResource ButtonSearch_Style}" 
+                        Visibility="{Binding IsSearchingInProgress, Converter={StaticResource BoolToVisibility_Converter}}" 
+                        />
 
-            <DataGrid.InputBindings>
-                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding LeftDoubleClick_Command}" />
-            </DataGrid.InputBindings>
+                <Button Grid.Column="3" Grid.Row="1" Content="Search"  
+                        Command="{Binding StartSearch_Command}"
+                        Style="{StaticResource ButtonSearch_Style}" 
+                        IsEnabled="{Binding IsNotSearchingInProgress}"
+                        />
 
-            <DataGrid.Columns>
+                <DataGrid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="7"
+                          ItemsSource="{Binding Contracts_ListView, UpdateSourceTrigger=PropertyChanged}" 
+                          SelectedValue="{Binding SelectedReqId}" SelectedValuePath="ReqId"
+                          Style="{DynamicResource DataGrid1_Style}" >
 
-                <DataGridTextColumn Header="Price"  Binding="{Binding PriceStr}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                    <DataGrid.InputBindings>
+                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding LeftDoubleClick_Command}" />
+                    </DataGrid.InputBindings>
 
-                <DataGridTextColumn Header="Currency"  Binding="{Binding Currency}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                    <DataGrid.Columns>
 
-                <DataGridTextColumn Header="LongName" Binding="{Binding Path=LongName}"  MinWidth="100">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="Price"  Binding="{Binding PriceStr}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <DataGridTextColumn Header="MarketName"  Binding="{Binding MarketName}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="Currency"  Binding="{Binding Currency}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <DataGridTextColumn Header="PrimaryExch"  Binding="{Binding PrimaryExch}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="LongName" Binding="{Binding Path=LongName}"  MinWidth="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Exchange"  Binding="{Binding Exchange}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="MarketName"  Binding="{Binding MarketName}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <DataGridTextColumn Header="SecType"  Binding="{Binding SecType}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="PrimaryExch"  Binding="{Binding PrimaryExch}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Error"  Binding="{Binding ErrorMsg}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Margin" Value="5,2" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                        <DataGridTextColumn Header="Exchange"  Binding="{Binding Exchange}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-            </DataGrid.Columns>
-        </DataGrid>
+                        <DataGridTextColumn Header="SecType"  Binding="{Binding SecType}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Error"  Binding="{Binding ErrorMsg}" >
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="5,2" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

@@ -97,6 +97,7 @@
     </ApplicationDefinition>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\Converters\BoolNegatedToVisibility_Converter.cs" />
+    <Compile Include="Infrastructure\Converters\BoolToOpacity_Converter.cs" />
     <Compile Include="Infrastructure\Converters\BoolToVisibility_Converter.cs" />
     <Compile Include="Infrastructure\Mvvm\Workspace_ViewModel.cs" />
     <Compile Include="MainWindow\Main_View.xaml.cs">
@@ -121,6 +122,14 @@
     <Compile Include="TwsExtensions\TwsWrapper_Contracts.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Interface.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Connection.cs" />
+    <Page Include="Resources\DataGrid\DataGridColumnHeader_Style.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\DataGrid\DataGrid1_Style.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

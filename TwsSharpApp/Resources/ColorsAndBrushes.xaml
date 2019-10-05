@@ -7,6 +7,7 @@
     <SolidColorBrush x:Key="Main.Static.Background.Brush" Color="{StaticResource Main.Static.Background.Color}" />
     <SolidColorBrush x:Key="Main.Static.Foreground.Brush" Color="{StaticResource Main.Static.Foreground.Color}" />
 
+    <SolidColorBrush x:Key="Main.Dialog.Background.Brush" Color="SlateGray" />
     <CornerRadius x:Key="Main.CornerRadius">2</CornerRadius>
 
     <!-- Toolbar -->
@@ -52,4 +53,9 @@
         <GradientStop Offset="0.9" Color="{StaticResource Workspaces.Background.Color}"/>
     </LinearGradientBrush>
 
+    <!-- DataGrid -->
+    <SolidColorBrush x:Key="DataGrid.Background.Brush" Color="#2d323a" />
+    <SolidColorBrush x:Key="DataGrid.Foreground.Brush" Color="{StaticResource Main.Static.Foreground.Color}" />
+    <SolidColorBrush x:Key="DataGrid.GridLines.Brush" Color="Gray" />
+    
 </ResourceDictionary>

@@ -79,11 +79,11 @@ namespace TwsSharpApp
 
         private async Task Close()
         {
-            IsVisible = false;
+            await CancelSearch();
             Symbol = string.Empty;
             Contracts_List.Clear();
 
-            await Task.CompletedTask;
+            IsVisible = false;
         }
 
         private RelayCommand startSearch_Command;

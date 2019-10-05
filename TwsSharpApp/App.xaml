@@ -23,6 +23,10 @@
 
                 <!-- TextBlock -->
                 <ResourceDictionary Source="Resources\TextBlock_Style.xaml"/>
+                
+                <!-- DataGrid-->
+                <ResourceDictionary Source="Resources\DataGrid\DataGrid1_Style.xaml"/>
+                <ResourceDictionary Source="Resources\DataGrid\DataGridColumnHeader_Style.xaml"/>
 
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

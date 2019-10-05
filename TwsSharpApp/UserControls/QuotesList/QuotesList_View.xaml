@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <local:BoolToOpacity_Converter x:Key="BoolToOpacity_Converter"/>
         <local:BoolNegatedToVisibility_Converter x:Key="BoolNegatedToVisibility_Converter1"/>
         <local:BoolToVisibility_Converter        x:Key="BoolToVisibility_Converter1"/>
 
@@ -60,7 +61,8 @@
                   ScrollViewer.VerticalScrollBarVisibility="Disabled" 
                   SizeChanged="lvQuotes_SizeChanged" 
                   ItemTemplate="{StaticResource QuoteItemTemplate}"
-                  Visibility="{Binding AddSymbol_VM.IsVisible, Converter={StaticResource BoolNegatedToVisibility_Converter1}}"
+                  Opacity="{Binding AddSymbol_VM.IsVisible, Converter={StaticResource BoolToOpacity_Converter}}"
+                  
                   >
 
             <ListView.ItemsPanel>
