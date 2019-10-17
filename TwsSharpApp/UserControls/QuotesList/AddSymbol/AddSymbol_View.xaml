@@ -44,13 +44,20 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.ColumnSpan="6" Text="Select a contract to add new symbol" />
+                <TextBlock Grid.ColumnSpan="6" Text="Select a contract to add new symbol" Style="{StaticResource TextBlockH2_Style}" />
                 <Button Grid.Column="6"
                         Command="{Binding CloseCommand}" 
                         Style="{StaticResource ButtonClose_Style}"  />
 
-                <TextBlock Grid.Column="0" Grid.Row="1" Text="Search for symbol:" VerticalAlignment="Center" />
-                <TextBox   Grid.Column="1" Grid.Row="1" Text="{Binding Symbol}"   Width="100" VerticalContentAlignment="Center"/>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Search for symbol:" Style="{StaticResource TextBlockP_Style}" />
+                <TextBox   Grid.Column="1" Grid.Row="1" x:Name="txtSymbol" Text="{Binding Symbol}" Width="100" 
+                           IsVisibleChanged="TxtSymbol_IsVisibleChanged" PreviewMouseUp="TxtSymbol_PreviewMouseUp"
+                           CharacterCasing="Upper">
+                    <TextBox.InputBindings>
+                        <KeyBinding Command="{Binding StartSearch_Command}" Key="Return" CommandParameter="{Binding Text, ElementName=txtSymbol}" />
+                        <KeyBinding Command="{Binding StartSearch_Command}" Key="Enter"  CommandParameter="{Binding Text, ElementName=txtSymbol}" />
+                    </TextBox.InputBindings>
+                </TextBox>
 
                 <Button Grid.Column="2" Grid.Row="1" Content="Cancel"  
                         Command="{Binding CancelSearch_Command}"
@@ -64,7 +71,7 @@
                         IsEnabled="{Binding IsNotSearchingInProgress}"
                         />
 
-                <DataGrid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="7"
+                <DataGrid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="7" Margin="0,5,0,0"
                           ItemsSource="{Binding Contracts_ListView, UpdateSourceTrigger=PropertyChanged}" 
                           SelectedValue="{Binding SelectedReqId}" SelectedValuePath="ReqId"
                           Style="{DynamicResource DataGrid1_Style}" >

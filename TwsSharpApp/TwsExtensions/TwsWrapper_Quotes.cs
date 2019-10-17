@@ -17,6 +17,12 @@ namespace TwsSharpApp
         ConnectionLost
     }
 
+    public enum UseRegularTradingHours : int
+    {
+        No = 0,
+        Yes
+    }
+
     public partial class TwsWrapper : EWrapper
     {
         private Dictionary<int, List<Bar>> historicData = new Dictionary<int, List<Bar>>();
@@ -50,9 +56,10 @@ namespace TwsSharpApp
 
         public async Task<int> RequestPrev2Closes(Contract contract)
         {
-            string queryTime = DateTime.Today.AddDays(1).ToString("yyyyMMdd HH:mm:ss");
+            string queryTime = DateTime.Today.ToString("yyyyMMdd HH:mm:ss");
 
-            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, "2 D", "1 day", "TRADES", 1, 1, false, null);
+            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, 
+                                           "2 D", "1 day", "TRADES", (int)UseRegularTradingHours.Yes, 1, false, null);
 
             await Task.CompletedTask;
             return NextOrderId;
@@ -60,9 +67,10 @@ namespace TwsSharpApp
 
         public async Task<int> RequestLatestClose(Contract contract)
         {
-            string queryTime = DateTime.Today.AddDays(1).ToString("yyyyMMdd HH:mm:ss");
-
-            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, "1 D", "1 day", "TRADES", 1, 1, false, null);
+            string queryTime = DateTime.Today.ToString("yyyyMMdd HH:mm:ss");
+            
+            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, 
+                                           "1 D", "1 day", "TRADES", (int)UseRegularTradingHours.Yes, 1, false, null);
             
             await Task.CompletedTask;
             return NextOrderId;

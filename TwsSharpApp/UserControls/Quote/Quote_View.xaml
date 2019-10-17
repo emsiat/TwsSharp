@@ -98,9 +98,14 @@
                 </TextBlock.Triggers>
             </TextBlock>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="2" Grid.Column="0"
                        Style="{DynamicResource Style_QuoteView_Misc}" 
-                       Text="{Binding Var, StringFormat=\{0:\+0.00;-0.00;0\}%}" 
+                       Text="{Binding Var, StringFormat=\{0:\+0.00;-0.00;0\}}" 
+                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+            
+            <TextBlock Grid.Row="2" Grid.Column="1" 
+                       Style="{DynamicResource Style_QuoteView_Misc}" 
+                       Text="{Binding VarPercent, StringFormat=\{0:\+0.00;-0.00;0\}%}" 
                        Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
 
             <TextBlock Grid.Row="3" Grid.Column="0"

@@ -7,15 +7,15 @@ namespace TwsSharpApp
 {
     public class Quote_ViewModel : Workspace_ViewModel
     {
-        public string Symbol { get { return contractDetails.Contract.Symbol; } }
+        public string Symbol { get { return ContractDetails.Contract.Symbol; } }
         public int ReqId { get; set; }
 
-        ContractDetails contractDetails { get; set; }
+        public ContractDetails ContractDetails { get; set; }
 
         public Quote_ViewModel(int reqId, ContractDetails cDetails)
         {
             ReqId  = reqId;
-            contractDetails = cDetails;
+            ContractDetails = cDetails;
             IsTabSelected = true;
         }
 
@@ -28,6 +28,20 @@ namespace TwsSharpApp
                 if (prevClose == value) return;
                 prevClose = value;
                 OnPropertyChanged(nameof(PrevClose));
+            }
+        }
+
+        private double latestClose = 0;
+        public  double LatestClose
+        {
+            get { return latestClose; }
+            set 
+            {
+                if (latestClose == value) return;
+                latestClose = value;
+                OnPropertyChanged(nameof(LatestClose));
+
+                Latest = latestClose;
             }
         }
 
@@ -73,9 +87,11 @@ namespace TwsSharpApp
                 latest = value;
                 OnPropertyChanged(nameof(Latest));
 
-                // Also bind the Var property:
-                Var = 100 * (Latest - PrevClose) / PrevClose;
                 IsDefined = !(double.IsNaN(latest));
+                
+                // Compute variations:
+                Var = latest - prevClose;
+                VarPercent = 100 * var / prevClose;
 
                 OnPropertyChanged(nameof(Background_TickVariation));
             }
@@ -110,6 +126,18 @@ namespace TwsSharpApp
                     OnPropertyChanged(nameof(Background_DailyVariation));
                 }
                 OnPropertyChanged(nameof(Var));
+            }
+        }
+
+        private double varPercent = 0;
+        public  double VarPercent
+        {
+            get { return varPercent; }
+            set
+            {
+                if (varPercent == value) return;
+                varPercent = value;
+                OnPropertyChanged(nameof(VarPercent));
             }
         }
 

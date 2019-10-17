@@ -91,19 +91,22 @@ namespace TwsSharpApp
         {
             get
             {
-                return startSearch_Command ?? (startSearch_Command = new RelayCommand(async param => await this.StartSearch(), param => true));
+                return startSearch_Command ?? (startSearch_Command = new RelayCommand(async param => await this.StartSearch(param as string), param => true));
             }
         }
 
-        private async Task StartSearch()
+        private async Task StartSearch(string smb)
         {
             IsSearchingInProgress = true;
             Contracts_List.Clear();
 
             Main_ViewModel.DataFeeder.ContractDetailsReceived_Event    += DataFeeder_ContractDetailsReceived_Event;
             Main_ViewModel.DataFeeder.ContractDetailsEndReceived_Event += DataFeeder_ContractDetailsEndReceived_Event;
-            
-            Main_ViewModel.DataFeeder.RequestContractDetails_Stock(Symbol);
+         
+            if(string.IsNullOrEmpty(smb))
+                Main_ViewModel.DataFeeder.RequestContractDetails_Stock(Symbol);
+            else
+                Main_ViewModel.DataFeeder.RequestContractDetails_Stock(smb);
 
             await Task.CompletedTask;
         }

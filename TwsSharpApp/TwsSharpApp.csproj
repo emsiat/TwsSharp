@@ -188,6 +188,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Resources\TextBox_Style.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\QuotesList\AddSymbol\AddSymbol_View.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

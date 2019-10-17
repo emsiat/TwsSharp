@@ -21,5 +21,16 @@ namespace TwsSharpApp
                 vm.Dispatcher = this.Dispatcher;
             }
         }
+
+        private void TxtSymbol_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == true)
+                txtSymbol.Focus();
+        }
+
+        private void TxtSymbol_PreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            txtSymbol.SelectAll();
+        }
     }
 }

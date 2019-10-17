@@ -27,6 +27,9 @@
                 <!-- DataGrid-->
                 <ResourceDictionary Source="Resources\DataGrid\DataGrid1_Style.xaml"/>
                 <ResourceDictionary Source="Resources\DataGrid\DataGridColumnHeader_Style.xaml"/>
+                
+                <!-- TextBox -->
+                <!--<ResourceDictionary Source="Resources\TextBox_Style.xaml"/>-->
 
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -54,7 +54,6 @@ namespace TwsSharpApp
         {
             if (Main_ViewModel.DataFeeder.IsConnected)
             {
-                Main_ViewModel.DataFeeder.RealTimeDataEndReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
                 Main_ViewModel.DataFeeder.HistoricalDataReceived_Event  += DataFeeder_HistoricalDataReceived_Event;
             }
         }
@@ -71,35 +70,25 @@ namespace TwsSharpApp
 
             Quote_ViewModel symVM = QuotesList.FirstOrDefault(s => s.Symbol == e.ContractData.Contract.Symbol);
             
-                if (symVM != null)
+            if (symVM != null)
+            {
+                // First cancel the old:
+                Main_ViewModel.DataFeeder.CancelRealTime(symVM.ReqId);
+                SymbolsList.Remove(symVM.ReqId);
+                QuotesList.Remove(symVM);
+            }
+
+            // subscribe to receive historical data events then send request receive latest 2 days of daily data for symbol: 
+            reqId = await Main_ViewModel.DataFeeder.RequestPrev2Closes(e.ContractData.Contract);
+
+            lock(symbolsList_Lock)
+            { 
+                Dispatcher.Invoke(() =>
                 {
-                    // First cancel the old:
-                    Main_ViewModel.DataFeeder.CancelRealTime(symVM.ReqId);
-                    SymbolsList.Remove(symVM.ReqId);
-                    QuotesList.Remove(symVM);
-                }
-           
-                // subscribe to receive historical data events then send request receive latest 2 days of daily data for symbol: 
-                reqId = await Main_ViewModel.DataFeeder.RequestPrev2Closes(e.ContractData.Contract);
-
-                lock(symbolsList_Lock)
-                { 
-                    Dispatcher.Invoke(() =>
-                    {
-                        symVM = addNewQuote(reqId, e.ContractData);
-                        if(symVM != null) SymbolsList.Add(reqId, symVM);
-                    });
-                }
-
-                // subscribe to receive new real time events then send real time request for symbol:            
-                reqId = await Main_ViewModel.DataFeeder.StartRealtime(e.ContractData.Contract);  
-                lock(symbolsList_Lock)
-                { 
-                    Dispatcher.Invoke(() =>
-                    {
-                        if(symVM != null) SymbolsList.Add(reqId, symVM);
-                    });
-                }      
+                    symVM = addNewQuote(reqId, e.ContractData);
+                    if(symVM != null) SymbolsList.Add(reqId, symVM);
+                });
+            }     
         }
 
         //
@@ -122,24 +111,40 @@ namespace TwsSharpApp
 
             if(e.HistoricalList.Count == 1)
             {
-                symbVM.PrevClose = e.HistoricalList[0].Open;
-                symbVM.LowValue  = e.HistoricalList[0].Low;
-                symbVM.HighValue = e.HistoricalList[0].High;
-                symbVM.Latest    = e.HistoricalList[0].Close;
+                symbVM.PrevClose   = e.HistoricalList[0].Open;
+                symbVM.LowValue    = e.HistoricalList[0].Low;
+                symbVM.HighValue   = e.HistoricalList[0].High;
+                symbVM.LatestClose = e.HistoricalList[0].Close;
 
                 time = DateTime.ParseExact(e.HistoricalList[0].Time, "yyyyMMdd", provider);
             }
             else if (e.HistoricalList.Count >= 2)
             {
-                symbVM.PrevClose = e.HistoricalList[0].Close;
-                symbVM.LowValue  = e.HistoricalList[1].Low;
-                symbVM.HighValue = e.HistoricalList[1].High;
-                symbVM.Latest    = e.HistoricalList[1].Close;
+                symbVM.PrevClose   = e.HistoricalList[0].Close;
+                symbVM.LowValue    = e.HistoricalList[1].Low;
+                symbVM.HighValue   = e.HistoricalList[1].High;
+                symbVM.LatestClose = e.HistoricalList[1].Close;
                 
                 time = DateTime.ParseExact(e.HistoricalList[1].Time, "yyyyMMdd", provider);
             }
 
             symbVM.Time = time.ToShortDateString();
+
+            // As we calculated the last 2 close prices variation, we set the lastest close as previous reference
+            // for the new real time quotes
+            symbVM.PrevClose = symbVM.LatestClose;
+
+            // subscribe to receive new real time events then send real time request for symbol:  
+            Main_ViewModel.DataFeeder.RealTimeDataEndReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
+            reqId = await Main_ViewModel.DataFeeder.StartRealtime(symbVM.ContractDetails.Contract);
+            lock (symbolsList_Lock)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (symbVM != null) SymbolsList.Add(reqId, symbVM);
+                });
+            }
+
             await Task.CompletedTask;
         }
 
