@@ -122,11 +122,15 @@
     <Compile Include="TwsExtensions\TwsWrapper_Contracts.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Interface.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Connection.cs" />
+    <Page Include="Resources\DataGrid\DataGridCell_Style.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Resources\DataGrid\DataGridColumnHeader_Style.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Resources\DataGrid\DataGrid1_Style.xaml">
+    <Page Include="Resources\DataGrid\DataGrid_Style.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -159,6 +163,10 @@
     <Page Include="Resources\ColorsAndBrushes.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Resources\DataGrid\DataGridRow_Style.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Resources\ListView\ListViewItemLeftMenu_Template.xaml">
       <Generator>MSBuild:Compile</Generator>

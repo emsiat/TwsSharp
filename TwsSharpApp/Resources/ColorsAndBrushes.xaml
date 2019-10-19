@@ -58,4 +58,10 @@
     <SolidColorBrush x:Key="DataGrid.Foreground.Brush" Color="{StaticResource Main.Static.Foreground.Color}" />
     <SolidColorBrush x:Key="DataGrid.GridLines.Brush" Color="Gray" />
     
+    <SolidColorBrush x:Key="DataGrid.RowEnabled.Background.Brush"          Color="White"     />
+    <SolidColorBrush x:Key="DataGrid.RowEnabled.Foreground.Brush"          Color="Blue"      />
+    <SolidColorBrush x:Key="DataGrid.RowDisabled.Background.Brush"         Color="LightGray" />
+    <SolidColorBrush x:Key="DataGrid.RowDisabled.Foreground.Brush"         Color="Gray"      />
+    <SolidColorBrush x:Key="DataGrid.RowDisabledSelected.Foreground.Brush" Color="White"     />
+    
 </ResourceDictionary>

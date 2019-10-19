@@ -25,11 +25,13 @@
                 <ResourceDictionary Source="Resources\TextBlock_Style.xaml"/>
                 
                 <!-- DataGrid-->
-                <ResourceDictionary Source="Resources\DataGrid\DataGrid1_Style.xaml"/>
+                <ResourceDictionary Source="Resources\DataGrid\DataGrid_Style.xaml"/>
                 <ResourceDictionary Source="Resources\DataGrid\DataGridColumnHeader_Style.xaml"/>
+                <ResourceDictionary Source="Resources\DataGrid\DataGridRow_Style.xaml"/>
+                <ResourceDictionary Source="Resources\DataGrid\DataGridCell_Style.xaml"/>
                 
                 <!-- TextBox -->
-                <!--<ResourceDictionary Source="Resources\TextBox_Style.xaml"/>-->
+                <ResourceDictionary Source="Resources\TextBox_Style.xaml"/>
 
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

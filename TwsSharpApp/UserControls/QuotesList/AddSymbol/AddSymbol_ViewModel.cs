@@ -19,9 +19,7 @@ namespace TwsSharpApp
         public AddSymbol_ViewModel()
         {
             Contracts_ListView = CollectionViewSource.GetDefaultView(this.Contracts_List) as ListCollectionView;
-            Contracts_ListView.IsLiveFiltering = true;
             
-            //Contracts_ListView.Filter = FindPoints;
         }
 
         private void InitAll()
@@ -152,13 +150,15 @@ namespace TwsSharpApp
         {
             if(SelectedReqId <= 0) return;
 
+            ContractDetails_ViewModel contractVM = Contracts_List.FirstOrDefault(c => c.ReqId == SelectedReqId);
+            if (contractVM.IsEnabled == false) return;
+
             // First cancel others ContractDetails requests
             foreach (ContractDetails_ViewModel cdVm in Contracts_List)
             {
                 cdVm.CancelPriceUpdate();
             }
 
-            ContractDetails_ViewModel contractVM = Contracts_List.FirstOrDefault(c => c.ReqId == SelectedReqId);
             ContractSelected_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(SelectedReqId, contractVM.ContractDetails));
 
             await Close();

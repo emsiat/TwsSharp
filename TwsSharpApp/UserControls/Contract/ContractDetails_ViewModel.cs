@@ -74,7 +74,13 @@ namespace TwsSharpApp
                 if (errorMsg == value) return;
                 errorMsg = value.Replace("Historical Market Data Service error message:", "");
                 OnPropertyChanged(nameof(ErrorMsg));
+                OnPropertyChanged(nameof(IsEnabled));
             }
+        }
+
+        public bool IsEnabled
+        {
+            get { return string.IsNullOrEmpty(errorMsg) ? true : false; }
         }
 
         public string Exchange    { get { return contractDetails.Contract.Exchange; } }
@@ -84,7 +90,7 @@ namespace TwsSharpApp
 
         public string LongName    { get { return contractDetails.LongName; } }
         public string UnderSymbol { get { return contractDetails.UnderSymbol; } }
-        public string MarketName  { get { return contractDetails.MarketName; } }
+        public string TimeZoneId  { get { return contractDetails.TimeZoneId; } }
 
         private void DataFeeder_ErrorReceived_Event(object sender, ErrorRecv_EventArgs e)
         {

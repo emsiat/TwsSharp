@@ -74,15 +74,20 @@
                 <DataGrid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="7" Margin="0,5,0,0"
                           ItemsSource="{Binding Contracts_ListView, UpdateSourceTrigger=PropertyChanged}" 
                           SelectedValue="{Binding SelectedReqId}" SelectedValuePath="ReqId"
-                          Style="{DynamicResource DataGrid1_Style}" >
+                          Style="{StaticResource DataGridContracts_Style}"
+                          CellStyle="{StaticResource DataGridCellContracts_Style}"
+                          RowStyle="{StaticResource DataGridRowContracts_Style}"
+                          ColumnHeaderStyle="{StaticResource DataGridColumnHeaderContracts_Style}"
+                          IsSynchronizedWithCurrentItem="True">
 
                     <DataGrid.InputBindings>
                         <MouseBinding Gesture="LeftDoubleClick" Command="{Binding LeftDoubleClick_Command}" />
+                        <KeyBinding   Key="Enter"               Command="{Binding LeftDoubleClick_Command}" />
                     </DataGrid.InputBindings>
 
                     <DataGrid.Columns>
 
-                        <DataGridTextColumn Header="Price"  Binding="{Binding PriceStr}" >
+                        <DataGridTextColumn Header="Closed Price"  Binding="{Binding PriceStr}" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Margin" Value="5,2" />
@@ -100,7 +105,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="LongName" Binding="{Binding Path=LongName}"  MinWidth="100">
+                        <DataGridTextColumn Header="Long Name" Binding="{Binding Path=LongName}"  MinWidth="100">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Margin" Value="5,2" />
@@ -109,7 +114,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="MarketName"  Binding="{Binding MarketName}" >
+                        <DataGridTextColumn Header="Time Zone"  Binding="{Binding TimeZoneId}" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Margin" Value="5,2" />
@@ -118,7 +123,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="PrimaryExch"  Binding="{Binding PrimaryExch}" >
+                        <DataGridTextColumn Header="Primary Exch"  Binding="{Binding PrimaryExch}" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Margin" Value="5,2" />
@@ -136,7 +141,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="SecType"  Binding="{Binding SecType}" >
+                        <DataGridTextColumn Header="Sec Type"  Binding="{Binding SecType}" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Margin" Value="5,2" />
