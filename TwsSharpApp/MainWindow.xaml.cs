@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Windows;
+using TwsSharpApp.Data;
 
 namespace TwsSharpApp
 {
@@ -10,6 +12,9 @@ namespace TwsSharpApp
         public MainWindow()
         {
             InitializeComponent();
+
+            DB_ModelContainer db = new DB_ModelContainer();
+            db.Database.Migrate();  
         }
     }
 }

@@ -13,15 +13,6 @@ namespace TwsSharpApp
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            AddSymbol_ViewModel vm = DataContext as AddSymbol_ViewModel;
-            if(vm != null)
-            {
-                vm.Dispatcher = this.Dispatcher;
-            }
-        }
-
         private void TxtSymbol_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue == true)

@@ -1,11 +1,7 @@
 ﻿using IBApi;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace TwsSharpApp
 {
@@ -65,16 +61,23 @@ namespace TwsSharpApp
             try
             {
                 EReaderSignal readerSignal = Signal;
-                //! [connect]
-                ClientSocket.eConnect("127.0.0.1", 7497, 0);
-                //! [connect]
-                //! [ereader]
+
+                ClientSocket.eConnect("127.0.0.1", 7497, 1);
+
                 //Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
                 var reader = new EReader(ClientSocket, readerSignal);
                 reader.Start();
+
                 //Once the messages are in the queue, an additional thread can be created to fetch them
-                new Thread(() => { while (ClientSocket.IsConnected()) { readerSignal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
-                //! [ereader]
+                new Thread(() => 
+                {
+                    while (ClientSocket.IsConnected())
+                    {
+                        readerSignal.waitForSignal();
+                        reader.processMsgs();
+                    }
+                }) { IsBackground = true }.Start();
+
                 /*************************************************************************************************************************************************/
                 /* One (although primitive) way of knowing if we can proceed is by monitoring the order's nextValidId reception which comes down automatically after connecting. */
                 /*************************************************************************************************************************************************/
@@ -88,9 +91,6 @@ namespace TwsSharpApp
             {
                 SocketConnected_Event?.Invoke(this, new SocketConnected_EventArgs(ClientSocket.IsConnected()));
             }
-
-            //await Task.Delay(30000);
-            //await Task.CompletedTask;
         }
 
         public void CloseSocket()

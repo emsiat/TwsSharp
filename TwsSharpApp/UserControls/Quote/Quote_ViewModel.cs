@@ -1,7 +1,9 @@
 ﻿using IBApi;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using TwsSharpApp.Data;
 
 namespace TwsSharpApp
 {
@@ -184,6 +186,22 @@ namespace TwsSharpApp
                     return Color_Var_Tick_Backgroud_Positive;
                 else
                     return Color_Var_Tick_Backgroud_Zero;
+            }
+        }
+
+        public async void SaveContract()
+        {
+            DB_ModelContainer db = new DB_ModelContainer();
+
+            ContractData cData = db.DisplayedContracts.FirstOrDefault(c => c.Symbol  == ContractDetails.Contract.Symbol &&
+                                                                           c.SecType == ContractDetails.Contract.SecType);
+
+            if(cData == null)
+            {
+                ContractData cd = new ContractData(ContractDetails.Contract);
+
+                db.DisplayedContracts.Add(cd);
+                await db.SaveChangesAsync();
             }
         }
     }

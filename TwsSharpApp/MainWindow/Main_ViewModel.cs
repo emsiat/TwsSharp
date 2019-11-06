@@ -3,17 +3,18 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace TwsSharpApp
 {
     public class Main_ViewModel : Workspace_ViewModel
     {
-        public static TwsWrapper DataFeeder{get; set;} = new TwsWrapper();
+        private Dispatcher dispatcher;
 
-        public Main_ViewModel()
+        public Main_ViewModel(Dispatcher dspchr)
         {
+            dispatcher  = dspchr;
             DisplayName = "TwsSharp";
         }
 
@@ -25,16 +26,16 @@ namespace TwsSharpApp
         #region TWS Code
         public void StartConnection()
         {
-            Main_ViewModel.DataFeeder.ErrorReceived_Event += DataFeeder_ErrorReceived_Event;
+            TwsData.DataFeeder.ErrorReceived_Event += DataFeeder_ErrorReceived_Event;
 
             // Open connection to TWS:
-            DataFeeder.REQ_OpenSocket();
+            TwsData.DataFeeder.REQ_OpenSocket();
         }
 
         public void CloseConnection()
         {
             // close the socket (called at exit):
-            Main_ViewModel.DataFeeder.CloseSocket();
+            TwsData.DataFeeder.CloseSocket();
         }
 
         private void DataFeeder_ErrorReceived_Event(object sender, ErrorRecv_EventArgs e)
@@ -117,20 +118,18 @@ namespace TwsSharpApp
             this.TabsCollection.Remove(tab);
         }
 
-        public async Task ShowFrontPage()
+        public void ShowFrontPage()
         {
             QuotesList_ViewModel tab = this.TabsCollection.FirstOrDefault(t => t.DisplayName == QuotesList_ViewModel.MyName)
                                         as QuotesList_ViewModel;
 
             if(tab == null)
             {
-                tab = new QuotesList_ViewModel();
+                tab = new QuotesList_ViewModel(dispatcher);
                 this.TabsCollection.Add(tab);
             }
 
             this.SetActiveTab(tab);
-
-            await Task.CompletedTask;
         }
 
         private void SetActiveTab(Workspace_ViewModel tab)

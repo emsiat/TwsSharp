@@ -1,25 +1,27 @@
-﻿using System;
+﻿using IBApi;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Threading;
+using TwsSharpApp.Data;
 
 namespace TwsSharpApp
 {
     class AddSymbol_ViewModel : Base_ViewModel
     {
-        public Dispatcher         Dispatcher { get; set; }
+        public Dispatcher         dispatcher { get; set; }
         public ListCollectionView Contracts_ListView { get; set; }
 
         public ObservableCollection<ContractDetails_ViewModel> Contracts_List { get; set; } = new ObservableCollection<ContractDetails_ViewModel>();
 
-        public AddSymbol_ViewModel()
+        public AddSymbol_ViewModel(Dispatcher dspch)
         {
+            dispatcher = dspch;
             Contracts_ListView = CollectionViewSource.GetDefaultView(this.Contracts_List) as ListCollectionView;
-            
         }
 
         private void InitAll()
@@ -98,15 +100,28 @@ namespace TwsSharpApp
             IsSearchingInProgress = true;
             Contracts_List.Clear();
 
-            Main_ViewModel.DataFeeder.ContractDetailsReceived_Event    += DataFeeder_ContractDetailsReceived_Event;
-            Main_ViewModel.DataFeeder.ContractDetailsEndReceived_Event += DataFeeder_ContractDetailsEndReceived_Event;
-         
+            List<ContractDetails> contractDetailsList;
+            
             if(string.IsNullOrEmpty(smb))
-                Main_ViewModel.DataFeeder.RequestContractDetails_Stock(Symbol);
+                contractDetailsList = await TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = this.Symbol, SecType="STK"});
             else
-                Main_ViewModel.DataFeeder.RequestContractDetails_Stock(smb);
+                contractDetailsList = await TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = smb, SecType="STK"});
 
-            await Task.CompletedTask;
+            foreach(ContractDetails cd in contractDetailsList)
+            {
+                ContractDetails_ViewModel contractVM = new ContractDetails_ViewModel(cd);
+                dispatcher.Invoke(() => Contracts_List.Add(contractVM));
+
+                contractVM.EndPriceUpdate_Event += ContractVM_EndPriceUpdate_Event;
+
+                Thread t = new Thread(new ThreadStart(contractVM.StartDownloadData));
+                t.Start();
+
+                lock(countContractsUpdating_lock)
+                {
+                    ++countContractsUpdating;
+                }
+            }
         }
 
         private RelayCommand cancelSearch_Command;
@@ -120,9 +135,6 @@ namespace TwsSharpApp
 
         private async Task CancelSearch()
         {
-            Main_ViewModel.DataFeeder.ContractDetailsReceived_Event    -= DataFeeder_ContractDetailsReceived_Event;
-            Main_ViewModel.DataFeeder.ContractDetailsEndReceived_Event -= DataFeeder_ContractDetailsEndReceived_Event;
-
             // Cancel price update for all ContractDetails
             foreach(ContractDetails_ViewModel cdVm in Contracts_List)
             {
@@ -164,21 +176,6 @@ namespace TwsSharpApp
             await Close();
         }
 
-        //
-        // Called from TWS when data about one contract has been received. 
-        //
-        private async void DataFeeder_ContractDetailsReceived_Event(object sender, ContractDetailsRecv_EventArgs e)
-        {
-            ContractDetails_ViewModel contractVM = new ContractDetails_ViewModel(e.ContractData);
-            Dispatcher.Invoke(() =>  Contracts_List.Add(contractVM));
-
-            contractVM.EndPriceUpdate_Event += ContractVM_EndPriceUpdate_Event;
-
-            await contractVM.StartGettingData();
-
-            lock(countContractsUpdating_lock) { ++countContractsUpdating; }
-        }
-
         private int countContractsUpdating = 0;
         private object countContractsUpdating_lock = new object();
 
@@ -196,16 +193,7 @@ namespace TwsSharpApp
 
             lock(countContractsUpdating_lock) { --countContractsUpdating; }
 
-            if (countContractsUpdating == 0) IsSearchingInProgress = false;
-        }
-
-        //
-        // Called from TWS where all contracts detail have been received. Unsubscribe from all events.
-        //
-        private void DataFeeder_ContractDetailsEndReceived_Event(object sender, ContractDetailsRecv_EventArgs e)
-        {
-            Main_ViewModel.DataFeeder.ContractDetailsReceived_Event    -= DataFeeder_ContractDetailsReceived_Event;
-            Main_ViewModel.DataFeeder.ContractDetailsEndReceived_Event -= DataFeeder_ContractDetailsEndReceived_Event;
+            if(countContractsUpdating == 0) IsSearchingInProgress = false;
         }
 
         public bool IsNotSearchingInProgress { get { return !isSearchingInProgress;  } }
@@ -223,12 +211,6 @@ namespace TwsSharpApp
                 OnPropertyChanged(nameof(IsNotSearchingInProgress));
                 OnPropertyChanged(nameof(IsSearchingInProgress));
             }
-        }
-
-        private bool FindPoints(object obj)
-        {
-            ContractDetails_ViewModel contractVM = obj as ContractDetails_ViewModel;
-            return contractVM.Price > 0;
         }
     }
 }

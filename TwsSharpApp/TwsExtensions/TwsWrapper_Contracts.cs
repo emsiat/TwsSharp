@@ -2,49 +2,40 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TwsSharpApp
 {
     public partial class TwsWrapper : EWrapper
     {
-        private Dictionary<int, List<ContractDetails>> contractsList = new Dictionary<int, List<ContractDetails>>();
-
         //
         // Request Contract Details about a stock symbol:
         //
-        public void RequestContractDetails_Stock(string symbol)
+
+        public event EventHandler<RequestId_EventArgs>           ContractDetailsEndReceived_Event;
+        public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsReceived_Event;
+
+        public int RequestContractDetails_Stock(string symbol)
         {
-            ClientSocket.reqContractDetails(nextValidId(), new Contract() {Symbol = symbol, SecType  = "STK" });
+            int reqId = nextValidId();
+            ClientSocket.reqContractDetails(reqId, new Contract() { Symbol = symbol, SecType = "STK" });
+            return reqId;
         }
 
-        public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsEndReceived_Event;
-        public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsReceived_Event;
+        public int RequestContractDetails(Contract contract)
+        {
+            int reqId = nextValidId();
+            ClientSocket.reqContractDetails(reqId, contract);
+            return reqId;
+        }
 
         public virtual void contractDetails(int reqId, ContractDetails contractDetails)
         {
-            //Debug.WriteLine("ContractDetails begin. ReqId: " + reqId);
-            //printContractMsg(contractDetails.Contract);
-            //printContractDetailsMsg(contractDetails);
-            //Debug.WriteLine("ContractDetails end. ReqId: " + reqId);
-
-            if(contractsList.ContainsKey(reqId) == false)
-            {
-                contractsList.Add(reqId, new List<ContractDetails>());
-            }
-
             ContractDetailsReceived_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(reqId, contractDetails));
-            contractsList[reqId].Add(contractDetails);
         }
 
         public virtual void contractDetailsEnd(int reqId)
         {
-            Debug.WriteLine("ContractDetailsEnd. " + reqId + "\n");
-            ContractDetailsEndReceived_Event?.Invoke(this, new ContractDetailsRecv_EventArgs(reqId, contractsList[reqId][0]));
-
-            contractsList.Remove(reqId);
+            ContractDetailsEndReceived_Event?.Invoke(this, new RequestId_EventArgs(reqId));
         }
 
         public void printContractMsg(Contract contract)

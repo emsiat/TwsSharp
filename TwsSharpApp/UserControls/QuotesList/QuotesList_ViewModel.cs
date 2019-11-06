@@ -5,9 +5,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Threading;
+using TwsSharpApp.Data;
 
 namespace TwsSharpApp
 {
@@ -20,132 +22,109 @@ namespace TwsSharpApp
 
         public static string MyName = "RT Quotes";
 
-        public Dispatcher Dispatcher { get; set; }
+        private readonly object symbolsList_Lock = new object();
+        private Dispatcher      dispatcher { get; set; }
 
-        public QuotesList_ViewModel()
+        public QuotesList_ViewModel(Dispatcher dspchr)
         {
+            dispatcher  = dspchr;
             DisplayName = MyName;
 
             QuotesListView = CollectionViewSource.GetDefaultView(this.QuotesList) as ListCollectionView;
             QuotesListView.IsLiveSorting = true;
-            QuotesListView.SortDescriptions.Add(new SortDescription("Symbol", ListSortDirection.Descending));
+            QuotesListView.SortDescriptions.Add(new SortDescription("VarPercent", ListSortDirection.Descending));
 
             IsTabSelected = true;
             CanClose = false;
 
-            Main_ViewModel.DataFeeder.SocketConnected_Event += DataFeeder_SocketConnected_Event;
-
+            TwsData.DataFeeder.RealTimeDataReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
             AddSymbol_VM.ContractSelected_Event += AddSymbol_VM_ContractSelected_Event;
         }
 
         ~QuotesList_ViewModel()
         {
-            Main_ViewModel.DataFeeder.RealTimeDataEndReceived_Event -= DataFeeder_RealTimeDataEndReceived_Event;
-            Main_ViewModel.DataFeeder.HistoricalDataReceived_Event  -= DataFeeder_HistoricalDataReceived_Event;
-
-            Main_ViewModel.DataFeeder.SocketConnected_Event -= DataFeeder_SocketConnected_Event;
-            AddSymbol_VM.ContractSelected_Event -= AddSymbol_VM_ContractSelected_Event;        
+            TwsData.DataFeeder.RealTimeDataReceived_Event -= DataFeeder_RealTimeDataEndReceived_Event;
+            AddSymbol_VM.ContractSelected_Event           -= AddSymbol_VM_ContractSelected_Event;        
         }
-
-        //
-        // Called from TWS when the connection with the gateway is established
-        //
-        private void DataFeeder_SocketConnected_Event(object sender, SocketConnected_EventArgs e)
-        {
-            if (Main_ViewModel.DataFeeder.IsConnected)
-            {
-                Main_ViewModel.DataFeeder.HistoricalDataReceived_Event  += DataFeeder_HistoricalDataReceived_Event;
-            }
-        }
-
-        private readonly object symbolsList_Lock = new object();
 
         // 
         // Called from AddSymbol_ViewModel when a contract was selected from list, will add it to the listview
         // then will subscribe to receive TWS real time (5s) data.
         //
-        private async void AddSymbol_VM_ContractSelected_Event(object sender, ContractDetailsRecv_EventArgs e)
+        private void AddSymbol_VM_ContractSelected_Event(object sender, ContractDetailsRecv_EventArgs e)
         {
-            int reqId = 0;
+            addNew(e.ContractData);
+        }
 
-            Quote_ViewModel symVM = QuotesList.FirstOrDefault(s => s.Symbol == e.ContractData.Contract.Symbol);
+        private async void addNew(ContractDetails contractDetails, bool needsSaveToDB = true)
+        {
+            Quote_ViewModel symVM = QuotesList.FirstOrDefault(s => s.Symbol == contractDetails.Contract.Symbol);
             
             if (symVM != null)
             {
                 // First cancel the old:
-                Main_ViewModel.DataFeeder.CancelRealTime(symVM.ReqId);
+                TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
                 SymbolsList.Remove(symVM.ReqId);
                 QuotesList.Remove(symVM);
             }
 
-            // subscribe to receive historical data events then send request receive latest 2 days of daily data for symbol: 
-            reqId = await Main_ViewModel.DataFeeder.RequestPrev2Closes(e.ContractData.Contract);
+            Tuple<List<Bar>, TwsError> tuple = TwsData.DataFeeder.GetPreviousCloses(contractDetails.Contract, 2);
 
-            lock(symbolsList_Lock)
-            { 
-                Dispatcher.Invoke(() =>
-                {
-                    symVM = addNewQuote(reqId, e.ContractData);
-                    if(symVM != null) SymbolsList.Add(reqId, symVM);
-                });
-            }     
+            await UpdateClosePrices(contractDetails, tuple.Item1, needsSaveToDB);
         }
 
-        //
-        // Called from TWS when historical data (previous close) has been receined for a contract.
-        //
-        private async void DataFeeder_HistoricalDataReceived_Event(object sender, HistoricalRecv_EventArgs e)
+        private async Task UpdateClosePrices(ContractDetails contractDetails, List<Bar> closePricesList, bool needsSaveToDB = true)
         {
             // Historical data list is empty, just return:
             lock(symbolsList_Lock)
             { 
-                if (e.HistoricalList == null || !SymbolsList.ContainsKey(e.RequestId)) return;
+                if (closePricesList == null || closePricesList.Count == 0) return;
             }
+
+            // send real time request for symbol: 
+            int reqId = await TwsData.DataFeeder.RequestRealTime(contractDetails.Contract);
+
+            Quote_ViewModel symbVM = new Quote_ViewModel(reqId, contractDetails);
+            if (symbVM == null) return;
 
             CultureInfo provider = CultureInfo.InvariantCulture;
-            int reqId = e.RequestId;
 
-            // Identify the contract by the request ID
-            Quote_ViewModel symbVM = SymbolsList[reqId];
             DateTime time = DateTime.Now;
 
-            if(e.HistoricalList.Count == 1)
+            if (closePricesList.Count == 1)
             {
-                symbVM.PrevClose   = e.HistoricalList[0].Open;
-                symbVM.LowValue    = e.HistoricalList[0].Low;
-                symbVM.HighValue   = e.HistoricalList[0].High;
-                symbVM.LatestClose = e.HistoricalList[0].Close;
+                symbVM.PrevClose   = closePricesList[0].Open;
+                symbVM.LowValue    = closePricesList[0].Low;
+                symbVM.HighValue   = closePricesList[0].High;
+                symbVM.LatestClose = closePricesList[0].Close;
 
-                time = DateTime.ParseExact(e.HistoricalList[0].Time, "yyyyMMdd", provider);
+                time = DateTime.ParseExact(closePricesList[0].Time, "yyyyMMdd", provider);
             }
-            else if (e.HistoricalList.Count >= 2)
+            else if (closePricesList.Count == 2)
             {
-                symbVM.PrevClose   = e.HistoricalList[0].Close;
-                symbVM.LowValue    = e.HistoricalList[1].Low;
-                symbVM.HighValue   = e.HistoricalList[1].High;
-                symbVM.LatestClose = e.HistoricalList[1].Close;
-                
-                time = DateTime.ParseExact(e.HistoricalList[1].Time, "yyyyMMdd", provider);
+                symbVM.PrevClose   = closePricesList[0].Close;
+                symbVM.LowValue    = closePricesList[1].Low;
+                symbVM.HighValue   = closePricesList[1].High;
+                symbVM.LatestClose = closePricesList[1].Close;
+
+                time = DateTime.ParseExact(closePricesList[1].Time, "yyyyMMdd", provider);
             }
+            else return;
 
             symbVM.Time = time.ToShortDateString();
 
-            // As we calculated the last 2 close prices variation, we set the lastest close as previous reference
-            // for the new real time quotes
-            symbVM.PrevClose = symbVM.LatestClose;
-
-            // subscribe to receive new real time events then send real time request for symbol:  
-            Main_ViewModel.DataFeeder.RealTimeDataEndReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
-            reqId = await Main_ViewModel.DataFeeder.StartRealtime(symbVM.ContractDetails.Contract);
             lock (symbolsList_Lock)
             {
-                Dispatcher.Invoke(() =>
+                dispatcher.Invoke(() =>
                 {
-                    if (symbVM != null) SymbolsList.Add(reqId, symbVM);
+                    QuotesList.Add(symbVM);
+                    SymbolsList.Add(reqId, symbVM);
                 });
             }
 
-            await Task.CompletedTask;
+            ChangeDimensions(height, width);
+
+            if(needsSaveToDB == true) symbVM.SaveContract();
         }
 
         //
@@ -166,23 +145,6 @@ namespace TwsSharpApp
             symbVM.Latest    = e.RealtimeBar.Close;
             symbVM.Time      = time.ToString("HH:mm:ss");
         }
-
-        //
-        // New contract details is added to the listview' ItemsSource
-        //
-        private Quote_ViewModel addNewQuote(int reqId, ContractDetails cDetails)
-        {
-            Quote_ViewModel dq = QuotesList.Where(q => q.Symbol == cDetails.Contract.Symbol).FirstOrDefault();
-
-            if(dq == null)
-            {
-                Quote_ViewModel qvm = new Quote_ViewModel(reqId, cDetails);
-                QuotesList.Add(qvm);
-                return qvm;
-            }
-            return null;
-        }
-
 
         private double itemWidth = 0;
         public  double ItemWidth
@@ -229,7 +191,7 @@ namespace TwsSharpApp
             {
                 if (addSymbol_VM == null)
                 {
-                    addSymbol_VM = new AddSymbol_ViewModel();
+                    addSymbol_VM = new AddSymbol_ViewModel(dispatcher);
                 }
 
                 return addSymbol_VM;
@@ -249,6 +211,31 @@ namespace TwsSharpApp
         private void ShowAddSymbol()
         {
             AddSymbol_VM.IsVisible = true;
+        }
+
+        public void LoadFromDB()
+        {
+            DB_ModelContainer db = new DB_ModelContainer();
+
+            List<ContractData> cDataList = db.DisplayedContracts.ToList();
+
+            foreach (ContractData cData in cDataList)
+            {
+                Thread t = new Thread(new ParameterizedThreadStart(addContractDetails));
+                t.Start(cData);
+            }
+        }
+
+        public async void addContractDetails(object obj)
+        {
+            if (!(obj is ContractData cData)) return;
+
+            List<ContractDetails> contractDetailsList;
+            contractDetailsList = await TwsData.DataFeeder.GetContractDetailsList(cData);
+
+            if (contractDetailsList.Count == 0) return;
+
+            addNew(contractDetailsList[0], false);
         }
     }
 }

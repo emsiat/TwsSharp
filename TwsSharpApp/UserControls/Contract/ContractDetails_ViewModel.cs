@@ -1,12 +1,17 @@
 ﻿using IBApi;
 using System;
-using System.Globalization;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace TwsSharpApp
 {
     public class ContractDetails_ViewModel : Base_ViewModel
     {
+        public ContractDetails ContractDetails { get; }
+        public int ReqId { get; private set; } = 0;
+
+        private double price = double.NaN;
+
         private bool isCanceled = false;
         private bool isLoading = false;
 
@@ -18,22 +23,69 @@ namespace TwsSharpApp
 
         public ContractDetails_ViewModel(ContractDetails cd)
         {
-            contractDetails = cd;
-            Main_ViewModel.DataFeeder.HistoricalDataReceived_Event += DataFeeder_HistoricalDataReceived_Event;
-            Main_ViewModel.DataFeeder.ErrorReceived_Event          += DataFeeder_ErrorReceived_Event;
+            ContractDetails = cd;
         }
 
-        private ContractDetails contractDetails;
-        public  ContractDetails ContractDetails { get { return contractDetails; } }
-
-        private int reqId = 0;
-        public  int ReqId
+        //
+        // Starts by requesting 1 previous close data:
+        //
+        public void StartDownloadData()
         {
-            get { return reqId; }
+            changeStatus(false, true);
+
+            if(Thread.CurrentThread.Name == null)
+            {
+                Thread.CurrentThread.Name = ContractDetails.Contract.ToString();
+            }
+
+            TwsData.DataFeeder.RequestId_Event += DataFeeder_RequestId_Event;
+            Tuple<List<Bar>, TwsError> tuple = TwsData.DataFeeder.GetPreviousCloses(ContractDetails.Contract, 1);
+
+            if (tuple.Item2 != null && tuple.Item2.id == ReqId)
+            {
+                price = double.NaN;
+                ErrorMsg = tuple.Item2.errorCode.ToString() + " : " + tuple.Item2.errorMsg;
+
+                changeStatus(isCanceled, false);
+            }
+            else if(tuple.Item1.Count > 0)
+            {
+                price = tuple.Item1[0].Close;
+                changeStatus(false, false);
+            }        
         }
 
-        private double price = double.NaN;
-        public  double Price { get { return price; } }
+        private void DataFeeder_RequestId_Event(object sender, RequestId_EventArgs e)
+        {
+            Contract contract = sender as Contract;
+            if(contract == ContractDetails.Contract)
+            {
+                TwsData.DataFeeder.RequestId_Event -= DataFeeder_RequestId_Event;
+                ReqId = e.RequestId;
+            }
+        }
+
+        // 
+        // Send a cancel request:
+        //
+        public void CancelPriceUpdate()
+        {
+            changeStatus(true, false);
+            TwsData.DataFeeder.CancelHistoricalData(ReqId);
+        }
+
+        private void changeStatus(bool isCanc, bool isInProgr)
+        {
+            isCanceled = isCanc;
+            isLoading  = isInProgr;
+
+            if(!isLoading)
+            {
+                EndPriceUpdate_Event?.Invoke(this, new EventArgs());
+            }
+
+            OnPropertyChanged(nameof(PriceStr));
+        }
 
         public string PriceStr
         {
@@ -83,65 +135,14 @@ namespace TwsSharpApp
             get { return string.IsNullOrEmpty(errorMsg) ? true : false; }
         }
 
-        public string Exchange    { get { return contractDetails.Contract.Exchange; } }
-        public string PrimaryExch { get { return contractDetails.Contract.PrimaryExch; } }
-        public string SecType     { get { return contractDetails.Contract.SecType; } }
-        public string Currency    { get { return contractDetails.Contract.Currency; } }
+        public string Exchange    { get { return ContractDetails.Contract.Exchange; } }
+        public string PrimaryExch { get { return ContractDetails.Contract.PrimaryExch; } }
+        public string SecType     { get { return ContractDetails.Contract.SecType; } }
+        public string Currency    { get { return ContractDetails.Contract.Currency; } }
 
-        public string LongName    { get { return contractDetails.LongName; } }
-        public string UnderSymbol { get { return contractDetails.UnderSymbol; } }
-        public string TimeZoneId  { get { return contractDetails.TimeZoneId; } }
-
-        private void DataFeeder_ErrorReceived_Event(object sender, ErrorRecv_EventArgs e)
-        {
-            if (e.Error != null && e.Error.id == reqId)
-            {
-                price = 0;
-                changeStatus(isCanceled, false);
-                
-                ErrorMsg = e.Error.errorCode.ToString() + " : " + e.Error.errorMsg;
-            }
-        }
-
-        private void DataFeeder_HistoricalDataReceived_Event(object sender, HistoricalRecv_EventArgs e)
-        {
-            if (e.HistoricalList == null) return;
-
-            CultureInfo provider = CultureInfo.InvariantCulture;
-            if(reqId == e.RequestId)
-            {
-                price = e.HistoricalList[0].Close;
-
-                changeStatus(false, false);
-            }
-        }
-
-        public async Task StartGettingData()
-        {
-            changeStatus(false, true);
-            reqId = await Main_ViewModel.DataFeeder.RequestLatestClose(contractDetails.Contract);
-        }
-
-        public void CancelPriceUpdate()
-        {
-            changeStatus(true, false);
-            Main_ViewModel.DataFeeder.CancelHistoricalData(reqId);
-        }
-
-        private void changeStatus(bool isCanc, bool isInProgr)
-        {
-            isCanceled = isCanc;
-            isLoading = isInProgr;
-
-            if(!isLoading)
-            {
-                Main_ViewModel.DataFeeder.HistoricalDataReceived_Event -= DataFeeder_HistoricalDataReceived_Event;
-                Main_ViewModel.DataFeeder.ErrorReceived_Event -= DataFeeder_ErrorReceived_Event;
-                EndPriceUpdate_Event?.Invoke(this, new EventArgs());
-            }
-
-            OnPropertyChanged(nameof(PriceStr));
-        }
+        public string LongName    { get { return ContractDetails.LongName; } }
+        public string UnderSymbol { get { return ContractDetails.UnderSymbol; } }
+        public string TimeZoneId  { get { return ContractDetails.TimeZoneId; } }
 
 /*
         private double minTick;

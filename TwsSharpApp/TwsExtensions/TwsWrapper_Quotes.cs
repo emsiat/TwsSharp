@@ -1,8 +1,5 @@
 ﻿using IBApi;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace TwsSharpApp
@@ -25,22 +22,24 @@ namespace TwsSharpApp
 
     public partial class TwsWrapper : EWrapper
     {
-        private Dictionary<int, List<Bar>> historicData = new Dictionary<int, List<Bar>>();
-
+#region Historical Data
         //
         // Historical Data
         //
-#region Historical Data
-        public event EventHandler<HistoricalRecv_EventArgs> HistoricalDataReceived_Event;
 
-        public void historicalData(int reqId, Bar bar)
+        protected event EventHandler<RequestId_EventArgs>          HistoricalDataEndReceived_Event;
+        protected event EventHandler<HistoricalBarRecv_EventArgs>  HistoricalBarReceived_Event;
+
+        public int RequestPreviousCloses(Contract contract, int days)
         {
-            if(historicData.ContainsKey(reqId) == false)
-            {
-                historicData.Add(reqId, new List<Bar>());
-            }
+            string queryTime = DateTime.Now.ToString("yyyyMMdd HH:mm:ss");
 
-            historicData[reqId].Add(bar);
+            int reqId = nextValidId();
+            ClientSocket.reqHistoricalData(reqId, contract, queryTime,
+                                           days.ToString() + " D", "1 day", "TRADES",
+                                           (int)UseRegularTradingHours.Yes, 1, false, null);
+
+            return reqId;
         }
 
         public void CancelHistoricalData(int reqId)
@@ -48,45 +47,33 @@ namespace TwsSharpApp
             ClientSocket.cancelHistoricalData(reqId);
         }
 
+        public void historicalData(int reqId, Bar bar)
+        {
+            HistoricalBarReceived_Event?.Invoke(this, new HistoricalBarRecv_EventArgs(reqId, bar));
+        }
+
         public void historicalDataEnd(int reqId, string startDate, string endDate)
         {
-            HistoricalDataReceived_Event?.Invoke(this, new HistoricalRecv_EventArgs(reqId, historicData[reqId]));
-            historicData.Remove(reqId);
+            HistoricalDataEndReceived_Event?.Invoke(this, new RequestId_EventArgs(reqId));
         }
 
-        public async Task<int> RequestPrev2Closes(Contract contract)
-        {
-            string queryTime = DateTime.Today.ToString("yyyyMMdd HH:mm:ss");
-
-            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, 
-                                           "2 D", "1 day", "TRADES", (int)UseRegularTradingHours.Yes, 1, false, null);
-
-            await Task.CompletedTask;
-            return NextOrderId;
-        }
-
-        public async Task<int> RequestLatestClose(Contract contract)
-        {
-            string queryTime = DateTime.Today.ToString("yyyyMMdd HH:mm:ss");
-            
-            ClientSocket.reqHistoricalData(nextValidId(), contract, queryTime, 
-                                           "1 D", "1 day", "TRADES", (int)UseRegularTradingHours.Yes, 1, false, null);
-            
-            await Task.CompletedTask;
-            return NextOrderId;
-        }
 #endregion
 
+#region Real time data
         //
         // Real time data:
         //
-#region Real time data
-        public async Task<int> StartRealtime(Contract contract)
+
+        public event EventHandler<RealtimeBarRecv_EventArgs> RealTimeDataReceived_Event;
+
+        public async Task<int> RequestRealTime(Contract contract)
         {
-            ClientSocket.reqRealTimeBars(nextValidId(), contract, 1, "TRADES", true, null);
+            int reqId = nextValidId();
+
+            ClientSocket.reqRealTimeBars(reqId, contract, 1, "TRADES", true, null);
             await Task.CompletedTask;
 
-            return NextOrderId;
+            return reqId;
         }
 
         public void CancelRealTime(int tickerId)
@@ -94,12 +81,10 @@ namespace TwsSharpApp
             ClientSocket.cancelRealTimeBars(tickerId);
         }
 
-        public event EventHandler<RealtimeBarRecv_EventArgs> RealTimeDataEndReceived_Event;
-
         public void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)
         {
             Bar recvBar = new Bar(UnixSecondsToEST(time, "o"/*"HH:mm:ss zzz"*/), open, high, low, close, volume, count, WAP);
-            RealTimeDataEndReceived_Event?.Invoke(this, new RealtimeBarRecv_EventArgs(reqId, recvBar));
+            RealTimeDataReceived_Event?.Invoke(this, new RealtimeBarRecv_EventArgs(reqId, recvBar));
         }
 
         private static TimeZoneInfo tst = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
@@ -110,6 +95,6 @@ namespace TwsSharpApp
             DateTime tstTime = TimeZoneInfo.ConvertTime(firstUnixTime.AddSeconds(seconds), TimeZoneInfo.Utc, tst);
             return tstTime.ToString();
         }
-        #endregion
+#endregion
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
@@ -21,18 +19,8 @@ namespace TwsSharpApp
         private void LoadViewModel()
         {
             // Now, finally get the MainWindowViewModel in action:
-            var viewModel = new Main_ViewModel();
+            Main_ViewModel viewModel = new Main_ViewModel(Dispatcher);
 
-            // When the ViewModel asks to be closed, 
-            // close the window.
-            EventHandler handler = null;
-            handler = delegate
-            {
-                viewModel.RequestClose -= handler;
-                //this.Close();
-            };
-            viewModel.RequestClose += handler;
-           
             // Allow all controls in the window to 
             // bind to the ViewModel by setting the 
             // DataContext, which propagates down 
@@ -40,13 +28,13 @@ namespace TwsSharpApp
             this.DataContext = viewModel;
         }
 
-        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             Main_ViewModel mvm = DataContext as Main_ViewModel;
             if(mvm != null)
             {
-                await mvm.ShowFrontPage();
-                await Task.Run(() => mvm.StartConnection());
+                mvm.ShowFrontPage();
+                mvm.StartConnection();
             }
         }
 

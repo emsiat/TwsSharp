@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace TwsSharpApp
@@ -18,8 +19,16 @@ namespace TwsSharpApp
             QuotesList_ViewModel vm = DataContext as QuotesList_ViewModel;
             if(vm != null)
             {
-                vm.Dispatcher = this.Dispatcher;
                 vm.ChangeDimensions(e.NewSize.Height, e.NewSize.Width);
+            }
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            QuotesList_ViewModel vm = DataContext as QuotesList_ViewModel;
+            if(vm != null)
+            {
+                vm.LoadFromDB();
             }
         }
     }

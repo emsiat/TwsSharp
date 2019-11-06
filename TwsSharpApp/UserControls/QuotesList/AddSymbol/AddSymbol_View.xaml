@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TwsSharpApp"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+             d:DesignHeight="450" d:DesignWidth="800" >
     
     <UserControl.Resources>
         <local:BoolToVisibility_Converter x:Key="BoolToVisibility_Converter"/>
@@ -52,6 +52,7 @@
                 <TextBlock Grid.Column="0" Grid.Row="1" Text="Search for symbol:" Style="{StaticResource TextBlockP_Style}" />
                 <TextBox   Grid.Column="1" Grid.Row="1" x:Name="txtSymbol" Text="{Binding Symbol}" Width="100" 
                            IsVisibleChanged="TxtSymbol_IsVisibleChanged" PreviewMouseUp="TxtSymbol_PreviewMouseUp"
+                           IsEnabled="{Binding IsNotSearchingInProgress}"
                            CharacterCasing="Upper">
                     <TextBox.InputBindings>
                         <KeyBinding Command="{Binding StartSearch_Command}" Key="Return" CommandParameter="{Binding Text, ElementName=txtSymbol}" />
