@@ -11,5 +11,23 @@ namespace TwsSharpApp
         {
             InitializeComponent();
         }
+
+        private void Border_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Quote_ViewModel vm = DataContext as Quote_ViewModel;
+
+            if (vm == null) return;
+
+            vm.IsMouseOver = true;
+        }
+
+        private void Border_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Quote_ViewModel vm = DataContext as Quote_ViewModel;
+
+            if (vm == null) return;
+
+            vm.IsMouseOver = false;
+        }
     }
 }

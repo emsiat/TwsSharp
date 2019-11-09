@@ -1,6 +1,7 @@
 ﻿using IBApi;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using TwsSharpApp.Data;
@@ -189,7 +190,7 @@ namespace TwsSharpApp
             }
         }
 
-        public async void SaveContract()
+        public async void SaveToDB()
         {
             DB_ModelContainer db = new DB_ModelContainer();
 
@@ -202,6 +203,44 @@ namespace TwsSharpApp
 
                 db.DisplayedContracts.Add(cd);
                 await db.SaveChangesAsync();
+            }
+        }
+
+        private bool isMouseOver = false;
+        public  bool IsMouseOver
+        {
+            get { return isMouseOver; }
+            set
+            {
+                if (isMouseOver == value) return;
+                isMouseOver = value;
+                OnPropertyChanged(nameof(IsMouseOver));
+            }
+        }
+
+        private RelayCommand deleteFromDB_Command;
+        public  RelayCommand DeleteFromDB_Command
+        {
+            get
+            {
+                return deleteFromDB_Command ?? (deleteFromDB_Command = new RelayCommand(async param => await this.DeleteFromDB(), param => true));
+            }
+        }
+
+        public static event EventHandler ContractRemoved_Event;
+
+        public async Task DeleteFromDB()
+        {
+            DB_ModelContainer db = new DB_ModelContainer();
+
+            ContractData cData = db.DisplayedContracts.FirstOrDefault(c => c.Symbol  == ContractDetails.Contract.Symbol &&
+                                                                           c.SecType == ContractDetails.Contract.SecType);
+
+            if(cData != null)
+            {
+                db.DisplayedContracts.Remove(cData);
+                await db.SaveChangesAsync();
+                ContractRemoved_Event?.Invoke(this, EventArgs.Empty);
             }
         }
     }

@@ -9,6 +9,14 @@
 
     <UserControl.Resources>
         <local:BoolToVisibility_Converter x:Key="BoolToVisibility_Converter"/>
+        
+        <Style x:Key="Style_QuoteView_Border" TargetType="{x:Type Border}">
+            <Setter Property="Margin"       Value="0" />
+            <Setter Property="CornerRadius" Value="{StaticResource Main.CornerRadius}" />
+            <Setter Property="Width"        Value="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+        </Style>
+        
         <Style x:Key="Style_QuoteView_Symbol" TargetType="{x:Type TextBlock}">
             <Setter Property="TextWrapping"        Value="NoWrap"/>
             <Setter Property="TextTrimming"        Value="None"/>
@@ -38,98 +46,131 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Margin="0" CornerRadius="{StaticResource Main.CornerRadius}" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                       Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" >
-        <Border.Background >
-            <SolidColorBrush x:Name="Background_DailyVar" Color="{Binding Background_DailyVariation}" />
-        </Border.Background>
+    <Grid>
+        <Border Style="{StaticResource Style_QuoteView_Border}"
+                Panel.ZIndex="100" 
+                MouseEnter="Border_MouseEnter" >
+            <Border.Background >
+                <SolidColorBrush x:Name="Background_DailyVar" Color="{Binding Background_DailyVariation}" />
+            </Border.Background>
 
-        <Grid >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"  MinHeight="9" />
-                <RowDefinition Height="2*" MinHeight="9" />
-                <RowDefinition Height="*"  MinHeight="9" />
-                <RowDefinition Height="*"  MinHeight="9" />
-                <RowDefinition Height="*"  MinHeight="9" />
-                <RowDefinition Height="*"  MinHeight="9" />
-            </Grid.RowDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"  MinHeight="9" />
+                    <RowDefinition Height="2*" MinHeight="9" />
+                    <RowDefinition Height="*"  MinHeight="9" />
+                    <RowDefinition Height="*"  MinHeight="9" />
+                    <RowDefinition Height="*"  MinHeight="9" />
+                    <RowDefinition Height="*"  MinHeight="9" />
+                </Grid.RowDefinitions>
 
-            <FrameworkElement Visibility="Hidden" DataContext="{Binding Background_DailyVariation, NotifyOnTargetUpdated=True}">
-                <FrameworkElement.Triggers>
-                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="Background_DailyVar"
-                                                 Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:1"
-                                                 AutoReverse="False" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </FrameworkElement.Triggers>
-            </FrameworkElement>
+                <FrameworkElement Visibility="Hidden" DataContext="{Binding Background_DailyVariation, NotifyOnTargetUpdated=True}">
+                    <FrameworkElement.Triggers>
+                        <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="Background_DailyVar"
+                                                     Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:1"
+                                                     AutoReverse="False" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </FrameworkElement.Triggers>
+                </FrameworkElement>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
-                       Text="{Binding Symbol}" 
-                       Style="{DynamicResource Style_QuoteView_Symbol}" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                           Text="{Binding Symbol}" 
+                           Style="{DynamicResource Style_QuoteView_Symbol}" />
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                       Text="{Binding Latest, NotifyOnTargetUpdated=True, StringFormat=\{0:#\,##0.00\}}" 
-                       Style="{DynamicResource Style_QuoteView_Price}" ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="{Binding Latest, NotifyOnTargetUpdated=True, StringFormat=\{0:#\,##0.00\}}" 
+                           Style="{DynamicResource Style_QuoteView_Price}" ScrollViewer.VerticalScrollBarVisibility="Disabled" >
 
-                <TextBlock.Foreground>
-                    <SolidColorBrush Color="{Binding Background_TickVariation}" />
-                </TextBlock.Foreground>
+                    <TextBlock.Foreground>
+                        <SolidColorBrush Color="{Binding Background_TickVariation}" />
+                    </TextBlock.Foreground>
 
-                <TextBlock.Triggers>
-                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(Brush.Opacity)" 
-                                                 From="0.0" To="1.0" Duration="0:0:1"
-                                                 AutoReverse="False" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </TextBlock.Triggers>
-            </TextBlock>
+                    <TextBlock.Triggers>
+                        <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(Brush.Opacity)" 
+                                                     From="0.0" To="1.0" Duration="0:0:1"
+                                                     AutoReverse="False" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </TextBlock.Triggers>
+                </TextBlock>
 
-            <TextBlock Grid.Row="2" Grid.Column="0"
-                       Style="{DynamicResource Style_QuoteView_Misc}" 
-                       Text="{Binding Var, StringFormat=\{0:\+0.00;-0.00;0\}}" 
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+                <TextBlock Grid.Row="2" Grid.Column="0"
+                           Style="{DynamicResource Style_QuoteView_Misc}" 
+                           Text="{Binding Var, StringFormat=\{0:\+0.00;-0.00;0\}}" 
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+                <TextBlock Grid.Row="2" Grid.Column="1" 
+                           Style="{DynamicResource Style_QuoteView_Misc}" 
+                           Text="{Binding VarPercent, StringFormat=\{0:\+0.00;-0.00;0\}%}" 
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0"
+                           Style="{DynamicResource Style_QuoteView_Label}"
+                           Text="Lo:"
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+                <TextBlock Grid.Row="3" Grid.Column="1"
+                           Style="{DynamicResource Style_QuoteView_Misc}"
+                           Text="{Binding LowValue, StringFormat=\{0:#\,##0.00\}}"
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" 
+                           Style="{DynamicResource Style_QuoteView_Label}"
+                           Text="Hi:"
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+                <TextBlock Grid.Row="4" Grid.Column="1"
+                           Style="{DynamicResource Style_QuoteView_Misc}"
+                           Text="{Binding HighValue, StringFormat=\{0:#\,##0.00\}}"
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                           Style="{DynamicResource Style_QuoteView_Label}"
+                           Text="{Binding Time, StringFormat=\{0:HH:mm:ss\}}" Margin="5,0,5,2"
+                           Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource Style_QuoteView_Border}"
+                Panel.ZIndex="101" Opacity="0.85" OpacityMask="#FF801111" Background="Gray"
+                Visibility="{Binding IsMouseOver, Converter={StaticResource BoolToVisibility_Converter}}"
+                MouseLeave="Border_MouseLeave">
             
-            <TextBlock Grid.Row="2" Grid.Column="1" 
-                       Style="{DynamicResource Style_QuoteView_Misc}" 
-                       Text="{Binding VarPercent, StringFormat=\{0:\+0.00;-0.00;0\}%}" 
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"    />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*"    />
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="3" Grid.Column="0"
-                       Style="{DynamicResource Style_QuoteView_Label}"
-                       Text="Lo:"
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
-            <TextBlock Grid.Row="3" Grid.Column="1"
-                       Style="{DynamicResource Style_QuoteView_Misc}"
-                       Text="{Binding LowValue, StringFormat=\{0:#\,##0.00\}}"
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" MinHeight="30" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" 
-                       Style="{DynamicResource Style_QuoteView_Label}"
-                       Text="Hi:"
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
-            <TextBlock Grid.Row="4" Grid.Column="1"
-                       Style="{DynamicResource Style_QuoteView_Misc}"
-                       Text="{Binding HighValue, StringFormat=\{0:#\,##0.00\}}"
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
-
-            <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                       Style="{DynamicResource Style_QuoteView_Label}"
-                       Text="{Binding Time, StringFormat=\{0:HH:mm:ss\}}" Margin="5,0,5,2"
-                       Visibility="{Binding IsDefined, Converter={StaticResource BoolToVisibility_Converter}}" />
-        </Grid>
-    </Border>
+                <Button Grid.Column="1" Grid.Row="1"
+                        Style="{StaticResource ButtonToolbarClose_Style}" 
+                        Command="{Binding DeleteFromDB_Command}" >
+                    
+                    <Button.ToolTip>
+                        <ToolTip Content="{Binding Symbol}" 
+                                 ContentStringFormat="Remove {0} from list" />
+                    </Button.ToolTip>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

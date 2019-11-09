@@ -38,7 +38,8 @@ namespace TwsSharpApp
             CanClose = false;
 
             TwsData.DataFeeder.RealTimeDataReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
-            AddSymbol_VM.ContractSelected_Event += AddSymbol_VM_ContractSelected_Event;
+            AddSymbol_VM.ContractSelected_Event           += AddSymbol_VM_ContractSelected_Event;
+            Quote_ViewModel.ContractRemoved_Event         += Quote_ViewModel_ContractRemoved_Event;
         }
 
         ~QuotesList_ViewModel()
@@ -124,7 +125,7 @@ namespace TwsSharpApp
 
             ChangeDimensions(height, width);
 
-            if(needsSaveToDB == true) symbVM.SaveContract();
+            if(needsSaveToDB == true) symbVM.SaveToDB();
         }
 
         //
@@ -236,6 +237,23 @@ namespace TwsSharpApp
             if (contractDetailsList.Count == 0) return;
 
             addNew(contractDetailsList[0], false);
+        }
+        
+        private void Quote_ViewModel_ContractRemoved_Event(object sender, EventArgs e)
+        {
+            Quote_ViewModel qvm = sender as Quote_ViewModel;
+
+            if (qvm == null) return;
+
+            Quote_ViewModel symVM = QuotesList.FirstOrDefault(s => s == qvm);
+            
+            if (symVM != null)
+            {
+                // First cancel the old:
+                TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
+                SymbolsList.Remove(symVM.ReqId);
+                QuotesList.Remove(symVM);
+            }
         }
     }
 }

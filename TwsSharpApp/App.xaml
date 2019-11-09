@@ -12,6 +12,7 @@
                 
                 <!-- Buttons -->
                 <ResourceDictionary Source="Resources\ButtonToolbar_Style.xaml" />
+                <ResourceDictionary Source="Resources\ButtonToolbarClose_Style.xaml" />
                 <ResourceDictionary Source="Resources\ButtonSearch_Style.xaml" />
                 <ResourceDictionary Source="Resources\ButtonClose_Style.xaml" />
 

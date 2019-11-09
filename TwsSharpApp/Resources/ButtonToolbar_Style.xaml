@@ -2,16 +2,18 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style x:Key="ButtonToolbar_Style" TargetType="{x:Type Button}">
+        <Setter Property="Height"     Value="24" />
+        <Setter Property="Margin"     Value="2,0"/>
+        <Setter Property="Padding"    Value="5,1,5,2"/>
+        
         <Setter Property="Background"      Value="{StaticResource Toolbar.Static.Background.Brush}"/>
         <Setter Property="BorderBrush"     Value="{StaticResource Toolbar.Static.Foreground.Brush}"/>
         <Setter Property="Foreground"      Value="{StaticResource Toolbar.Static.Foreground.Brush}"/>
+
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment"   Value="Center"/>
-        <Setter Property="Padding"    Value="5,1,5,2"/>
-        <Setter Property="Height"     Value="24" />
-        <Setter Property="Margin"     Value="2,0"/>
-        <!--<Setter Property="FontWeight" Value="Normal" />-->
+        
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
