@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace TwsSharpApp
 {
@@ -54,7 +55,7 @@ namespace TwsSharpApp
             set { clientSocket = value; }
         }
 
-        public void REQ_OpenSocket()
+        public async void REQ_OpenSocket(string connIp, int connPort, int connClientID)
         {
             if (ClientSocket.IsConnected()) return;
 
@@ -62,7 +63,7 @@ namespace TwsSharpApp
             {
                 EReaderSignal readerSignal = Signal;
 
-                ClientSocket.eConnect("127.0.0.1", 7497, 1);
+                ClientSocket.eConnect(connIp, connPort, connClientID);
 
                 //Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
                 var reader = new EReader(ClientSocket, readerSignal);
@@ -81,7 +82,7 @@ namespace TwsSharpApp
                 /*************************************************************************************************************************************************/
                 /* One (although primitive) way of knowing if we can proceed is by monitoring the order's nextValidId reception which comes down automatically after connecting. */
                 /*************************************************************************************************************************************************/
-                while (NextOrderId <= 0) {/*await Task.Delay(1);*/ }
+                while (NextOrderId <= 0) {await Task.Delay(1); }
             }
             catch(Exception ex)
             {
@@ -96,6 +97,12 @@ namespace TwsSharpApp
         public void CloseSocket()
         {
             if (ClientSocket.IsConnected()) ClientSocket.eDisconnect();
+        }
+
+        public event EventHandler ConnectionClosed_Event;
+        public virtual void connectionClosed()
+        {
+            ConnectionClosed_Event?.Invoke(this, new EventArgs());
         }
 
         public bool IsConnected { get { return ClientSocket.IsConnected(); } }

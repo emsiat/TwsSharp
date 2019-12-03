@@ -14,7 +14,16 @@ namespace TwsSharpApp
             InitializeComponent();
 
             DB_ModelContainer db = new DB_ModelContainer();
-            db.Database.Migrate();  
+            db.Database.Migrate();
+        }
+
+        protected override void OnClosing (System.ComponentModel.CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            Main_ViewModel mainViewModel = mainViewControl.DataContext as Main_ViewModel;
+            if(mainViewModel != null && mainViewModel.IsRestartRequested == true)
+                System.Windows.Forms.Application.Restart();
         }
     }
 }

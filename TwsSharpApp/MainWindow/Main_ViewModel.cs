@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
 
@@ -11,6 +13,7 @@ namespace TwsSharpApp
     public class Main_ViewModel : Workspace_ViewModel
     {
         private Dispatcher dispatcher;
+        private SettingsList settingsList = null;
 
         public Main_ViewModel(Dispatcher dspchr)
         {
@@ -20,16 +23,33 @@ namespace TwsSharpApp
 
         ~Main_ViewModel()
         {
+            TwsData.DataFeeder.ErrorReceived_Event    -= DataFeeder_ErrorReceived_Event;
+            TwsData.DataFeeder.SocketConnected_Event  -= DataFeeder_SocketConnected_Event;
+
             CloseConnection();
         }
 
         #region TWS Code
         public void StartConnection()
         {
-            TwsData.DataFeeder.ErrorReceived_Event += DataFeeder_ErrorReceived_Event;
+            TwsData.DataFeeder.ErrorReceived_Event    += DataFeeder_ErrorReceived_Event;
+            TwsData.DataFeeder.SocketConnected_Event  += DataFeeder_SocketConnected_Event;
 
             // Open connection to TWS:
-            TwsData.DataFeeder.REQ_OpenSocket();
+            string connIp       = settingsList.GetValueStr(SettingsList.Keys.ConnIp);
+            int?   connPort     = settingsList.GetValueInt(SettingsList.Keys.ConnPort);
+            int?   connClientID = settingsList.GetValueInt(SettingsList.Keys.ConnClientID);
+
+            if(!string.IsNullOrEmpty(connIp) && connPort != null && connClientID != null)
+            {
+                TwsData.DataFeeder.REQ_OpenSocket(connIp, connPort.Value, connClientID.Value);
+            }
+        }
+
+        private void DataFeeder_SocketConnected_Event(object sender, SocketConnected_EventArgs e)
+        {
+            // The Socket is connected, load the symbols from DB
+            QuotesList_ViewModel.Instance.LoadFromDB();
         }
 
         public void CloseConnection()
@@ -116,6 +136,11 @@ namespace TwsSharpApp
         {
             Workspace_ViewModel tab = sender as Workspace_ViewModel;
             this.TabsCollection.Remove(tab);
+
+            if(sender is SettingsList_ViewModel)
+            {
+                (sender as SettingsList_ViewModel).RestartRequest -= Tab_RestartRequest;
+            }
         }
 
         public void ShowFrontPage()
@@ -125,7 +150,7 @@ namespace TwsSharpApp
 
             if(tab == null)
             {
-                tab = new QuotesList_ViewModel(dispatcher);
+                tab = QuotesList_ViewModel.CreateNew(dispatcher);
                 this.TabsCollection.Add(tab);
             }
 
@@ -135,6 +160,48 @@ namespace TwsSharpApp
         private void SetActiveTab(Workspace_ViewModel tab)
         {
             CommandsCollection.MoveCurrentTo(tab);
+        }
+
+        private RelayCommand showSettings_Command;
+        public  RelayCommand ShowSettings_Command
+        {
+            get
+            {
+                return showSettings_Command ?? (showSettings_Command = new RelayCommand(param => this.ShowSettings()));
+            }
+        }
+
+        public void ShowSettings()
+        {
+            SettingsList_ViewModel tab = TabsCollection.FirstOrDefault(vm => vm.DisplayName == SettingsList_ViewModel.MyName)
+                                         as SettingsList_ViewModel;
+
+            if(tab == null)
+            {
+                tab = new SettingsList_ViewModel(settingsList);
+                TabsCollection.Add(tab);
+                tab.RestartRequest += Tab_RestartRequest;
+            }
+
+            SetActiveTab(tab);
+        }
+
+        public bool IsRestartRequested = false;
+        private async void Tab_RestartRequest(object sender, EventArgs e)
+        {
+            CloseConnection();
+
+            await Task.Delay(1000);
+
+            IsRestartRequested = true;
+ 
+            Application.Current.Shutdown();
+        }
+
+        public void LoadSettingsFromDB()
+        {
+            settingsList = new SettingsList();
+            settingsList.LoadSettingsFromDB();
         }
     }
 }

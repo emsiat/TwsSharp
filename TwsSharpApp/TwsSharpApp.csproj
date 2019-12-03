@@ -290,6 +290,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -312,6 +313,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DataBase\Setting.cs" />
     <Compile Include="DataBase\DB_ModelContainer.cs" />
     <Compile Include="DataBase\ContractData.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -326,6 +328,10 @@
     <Compile Include="Migrations\20191024183452_InitialCreation.cs" />
     <Compile Include="Migrations\20191024183452_InitialCreation.designer.cs">
       <DependentUpon>20191024183452_InitialCreation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20191110071127_Added Settings table.cs" />
+    <Compile Include="Migrations\20191110071127_Added Settings table.designer.cs">
+      <DependentUpon>20191110071127_Added Settings table.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\DB_ModelContainerModelSnapshot.cs" />
     <Compile Include="TwsExtensions\Events\RequestId_EventArgs.cs" />
@@ -349,6 +355,11 @@
     <Compile Include="TwsExtensions\TwsWrapper_Contracts.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Interface.cs" />
     <Compile Include="TwsExtensions\TwsWrapper_Connection.cs" />
+    <Compile Include="UserControls\SettingsList\SettingsList.cs" />
+    <Compile Include="UserControls\SettingsList\SettingsList_View.xaml.cs">
+      <DependentUpon>SettingsList_View.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\SettingsList\SettingsList_ViewModel.cs" />
     <Page Include="Resources\ButtonToolbarClose_Style.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -442,6 +453,10 @@
     <Page Include="UserControls\Quote\Quote_View.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControls\SettingsList\SettingsList_View.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,24 @@ namespace TwsSharpApp
         private readonly object symbolsList_Lock = new object();
         private Dispatcher      dispatcher { get; set; }
 
-        public QuotesList_ViewModel(Dispatcher dspchr)
+        SettingsList settingsList = null;
+
+        private static QuotesList_ViewModel instance = null;
+        public  static QuotesList_ViewModel Instance
+        {
+            get
+            {
+                return instance ?? throw new ArgumentNullException(nameof(instance), "Instance cannot be null");
+            }
+        }
+
+        public  static QuotesList_ViewModel CreateNew(Dispatcher dspchr)
+        {
+            instance = new QuotesList_ViewModel(dspchr);
+            return instance;
+        }
+
+        private QuotesList_ViewModel(Dispatcher dspchr)
         {
             dispatcher  = dspchr;
             DisplayName = MyName;
@@ -38,6 +55,7 @@ namespace TwsSharpApp
             CanClose = false;
 
             TwsData.DataFeeder.RealTimeDataReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
+            TwsData.DataFeeder.ConnectionClosed_Event     += DataFeeder_ConnectionClosed_Event;
             AddSymbol_VM.ContractSelected_Event           += AddSymbol_VM_ContractSelected_Event;
             Quote_ViewModel.ContractRemoved_Event         += Quote_ViewModel_ContractRemoved_Event;
         }
@@ -45,7 +63,7 @@ namespace TwsSharpApp
         ~QuotesList_ViewModel()
         {
             TwsData.DataFeeder.RealTimeDataReceived_Event -= DataFeeder_RealTimeDataEndReceived_Event;
-            AddSymbol_VM.ContractSelected_Event           -= AddSymbol_VM_ContractSelected_Event;        
+            AddSymbol_VM.ContractSelected_Event           -= AddSymbol_VM_ContractSelected_Event;
         }
 
         // 
@@ -65,8 +83,14 @@ namespace TwsSharpApp
             {
                 // First cancel the old:
                 TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
-                SymbolsList.Remove(symVM.ReqId);
-                QuotesList.Remove(symVM);
+                lock (symbolsList_Lock)
+                {
+                    dispatcher.Invoke(() =>
+                    {
+                        SymbolsList.Remove(symVM.ReqId);
+                        QuotesList.Remove(symVM);
+                    });
+                }
             }
 
             Tuple<List<Bar>, TwsError> tuple = TwsData.DataFeeder.GetPreviousCloses(contractDetails.Contract, 2);
@@ -251,8 +275,27 @@ namespace TwsSharpApp
             {
                 // First cancel the old:
                 TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
-                SymbolsList.Remove(symVM.ReqId);
-                QuotesList.Remove(symVM);
+                lock (symbolsList_Lock)
+                {
+                    SymbolsList.Remove(symVM.ReqId);
+                    QuotesList.Remove(symVM);
+                }
+            }
+        }
+
+        private void DataFeeder_ConnectionClosed_Event(object sender, EventArgs e)
+        {
+            TwsData.DataFeeder.ConnectionClosed_Event -= DataFeeder_ConnectionClosed_Event;
+
+            foreach(Quote_ViewModel symVM in QuotesList)
+            {
+                TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
+            }
+
+            lock (symbolsList_Lock)
+            {
+                SymbolsList.Clear();
+                QuotesList.Clear();
             }
         }
     }

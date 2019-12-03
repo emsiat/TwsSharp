@@ -18,6 +18,10 @@
         <DataTemplate DataType="{x:Type local:QuotesList_ViewModel}">
             <local:QuotesList_View/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:SettingsList_ViewModel}">
+            <local:SettingsList_View/>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -32,24 +36,39 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Column="0" Grid.Row="0" Padding="0,10,0,0">
-            <ListView ItemsSource        ="{Binding}" 
-                      DataContext        ="{Binding CommandsCollection}" 
-                      ItemContainerStyle ="{DynamicResource ListViewItemLeftMenu_Style}" 
-                      Template           ="{DynamicResource ListViewItemLeftMenu_Template}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <ListView ItemsSource        ="{Binding}" 
+                          DataContext        ="{Binding CommandsCollection}" 
+                          ItemContainerStyle ="{DynamicResource ListViewItemLeftMenu_Style}" 
+                          Template           ="{DynamicResource ListViewItemLeftMenu_Template}" IsSynchronizedWithCurrentItem="True">
 
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="{Binding DisplayName}" 
-                                       Style="{DynamicResource TextBlockLeftMenu_Style}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                <TextBlock Grid.Column="0" Text="{Binding DisplayName}" 
+                                           Style="{DynamicResource TextBlockLeftMenu_Style}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <Button Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource ButtonToolbar_Style}"
+                            FontFamily="Segoe MDL2 Assets" FontSize="19"
+                            Command="{Binding ShowSettings_Command}"
+                    >&#xE713;</Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <Border Grid.Column="1" Grid.Row="0" Background="{DynamicResource Workspaces.Background.Brush}" >

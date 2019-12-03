@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:TwsSharpApp"
         mc:Ignorable="d"
         Title="TwsSharpApp" Height="450" Width="800" 
+        MinWidth="800" MinHeight="450"
         FontFamily="{DynamicResource Font_App}" FontSize="{DynamicResource FontSize_App}">
 
-    <local:Main_View/>
+    <local:Main_View x:Name="mainViewControl" />
 
 </Window>

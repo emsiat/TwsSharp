@@ -21,11 +21,6 @@ namespace TwsSharpApp
             throw e;
         }
 
-        public virtual void connectionClosed()
-        {
-            Debug.WriteLine("Connection closed.\n");
-        }
-
         public virtual void currentTime(long time)
         {
             Debug.WriteLine("Current Time: " + time + "\n");

@@ -8,9 +8,10 @@ using TwsSharpApp.Data;
 namespace TwsSharpApp.Migrations
 {
     [DbContext(typeof(DB_ModelContainer))]
-    partial class DB_ModelContainerModelSnapshot : ModelSnapshot
+    [Migration("20191110071127_Added Settings table")]
+    partial class AddedSettingstable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.6");

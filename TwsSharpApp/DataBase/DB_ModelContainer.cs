@@ -15,5 +15,7 @@ namespace TwsSharpApp.Data
         }
 
         public virtual DbSet<ContractData> DisplayedContracts { get; set; }
+
+        public virtual DbSet<Setting> Settings { get; set; }
     }
 }

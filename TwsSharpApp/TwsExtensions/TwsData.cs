@@ -25,7 +25,7 @@ namespace TwsSharpApp
             List<Bar> barsList = null;
             TwsError error = null;
 
-            int reqId = -1;
+            int reqId = int.MinValue;
 
             void hHistoricalBarReceived(object sender, HistoricalBarRecv_EventArgs e)
             {
