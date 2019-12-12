@@ -33,10 +33,7 @@ namespace TwsSharpApp
             Main_ViewModel mvm = DataContext as Main_ViewModel;
             if(mvm != null)
             {
-                mvm.LoadSettingsFromDB();
-                mvm.ShowFrontPage();
-
-                mvm.StartConnection();
+                mvm.ExecuteOnLoad();
             }
         }
 

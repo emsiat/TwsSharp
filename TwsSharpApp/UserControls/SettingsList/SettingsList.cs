@@ -66,7 +66,9 @@ namespace TwsSharpApp
         {
             bool isChanged = false;
 
-            if(preValuesList[key.ToString()] != valuesList[key.ToString()])
+            if(preValuesList == null || 
+               preValuesList.ContainsKey(key.ToString()) == false || 
+               preValuesList[key.ToString()] != valuesList[key.ToString()])
             {
                 isChanged = true;
             }
@@ -83,8 +85,16 @@ namespace TwsSharpApp
                 if (IsValueChanged(key) == true)
                 {
                     Setting set = db.Settings.FirstOrDefault(s => s.Key == key.ToString());
-                    set.Value = valuesList[key.ToString()];
-                    db.Settings.Update(set);
+                    if(set == null)
+                    {
+                        set = new Setting(key.ToString(), valuesList[key.ToString()]);
+                        db.Settings.Add(set);
+                    }
+                    else
+                    {
+                        set.Value = valuesList[key.ToString()];
+                        db.Settings.Update(set);
+                    }
                 }
             }
 
@@ -92,26 +102,25 @@ namespace TwsSharpApp
                 db.SaveChanges();
         }
 
-        public void LoadSettingsFromDB()
+        public bool LoadSettingsFromDB()
         {
+            bool settingsOK = true;
             DB_ModelContainer db = new DB_ModelContainer();
 
             valuesList = db.Settings.ToDictionary(s => s.Key, s => s.Value);
+
+            preValuesList = new Dictionary<string, string>(valuesList);
 
             foreach(SettingsList.Keys key in Enum.GetValues(typeof(Keys)))
             {
                 if (valuesList.Keys.Contains(key.ToString()) == false)
                 {
+                    settingsOK = false;
                     valuesList[key.ToString()] = DefaultValues[(int)key];
-                    Setting set = new Setting(key.ToString(), valuesList[key.ToString()]);
-                    db.Settings.Add(set);
                 }
             }
 
-            preValuesList = new Dictionary<string, string>(valuesList);
-
-            if (db.ChangeTracker.HasChanges() == true)
-                db.SaveChanges();
+            return settingsOK;
         }
 
         public void ConnUndo()

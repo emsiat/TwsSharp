@@ -48,8 +48,18 @@ namespace TwsSharpApp
 
         private void DataFeeder_SocketConnected_Event(object sender, SocketConnected_EventArgs e)
         {
-            // The Socket is connected, load the symbols from DB
-            QuotesList_ViewModel.Instance.LoadFromDB();
+            if(e.IsConnected == true)
+            {
+                // The Socket is connected, load the symbols from DB
+                QuotesList_ViewModel.Instance.LoadFromDB();
+            }
+            else
+            {
+                dispatcher.Invoke(() =>
+                {
+                    ShowSettings();
+                });
+            }
         }
 
         public void CloseConnection()
@@ -143,7 +153,7 @@ namespace TwsSharpApp
             }
         }
 
-        public void ShowFrontPage()
+        private void ShowFrontPage()
         {
             QuotesList_ViewModel tab = this.TabsCollection.FirstOrDefault(t => t.DisplayName == QuotesList_ViewModel.MyName)
                                         as QuotesList_ViewModel;
@@ -171,7 +181,7 @@ namespace TwsSharpApp
             }
         }
 
-        public void ShowSettings()
+        private void ShowSettings()
         {
             SettingsList_ViewModel tab = TabsCollection.FirstOrDefault(vm => vm.DisplayName == SettingsList_ViewModel.MyName)
                                          as SettingsList_ViewModel;
@@ -198,10 +208,23 @@ namespace TwsSharpApp
             Application.Current.Shutdown();
         }
 
-        public void LoadSettingsFromDB()
+        public void ExecuteOnLoad()
+        {
+            if(LoadSettingsFromDB() == false)
+            {
+                ShowSettings();
+            }
+            else
+            {
+                ShowFrontPage();
+                StartConnection();
+            }
+        }
+
+        private bool LoadSettingsFromDB()
         {
             settingsList = new SettingsList();
-            settingsList.LoadSettingsFromDB();
+            return settingsList.LoadSettingsFromDB();
         }
     }
 }

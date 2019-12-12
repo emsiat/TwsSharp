@@ -55,43 +55,63 @@ namespace TwsSharpApp
             set { clientSocket = value; }
         }
 
-        public async void REQ_OpenSocket(string connIp, int connPort, int connClientID)
+        public void REQ_OpenSocket(string connIp, int connPort, int connClientID)
         {
             if (ClientSocket.IsConnected()) return;
 
-            try
+            Semaphore     semaphore = new Semaphore(0, 1);
+            EReaderSignal readerSignal = Signal;
+            EReader       reader = null;
+       
+            new Thread(() => 
             {
-                EReaderSignal readerSignal = Signal;
+                try
+                {
+                    ClientSocket.eConnect(connIp, connPort, connClientID);
 
-                ClientSocket.eConnect(connIp, connPort, connClientID);
+                    //Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
+                    reader = new EReader(ClientSocket, readerSignal);
+                    reader.Start();
+                }
+                catch(Exception ex)
+                {
+                    error(ex.Message);
+                }
+                finally
+                {
+                    semaphore.Release();              
+                }
 
-                //Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
-                var reader = new EReader(ClientSocket, readerSignal);
-                reader.Start();
+                SocketConnected_Event?.Invoke(this, new SocketConnected_EventArgs(ClientSocket.IsConnected())); 
+            }) { IsBackground = true }.Start();
+ 
+            //Once the messages are in the queue, an additional thread can be created to fetch them
+            new Thread(() => 
+            {
+                semaphore.WaitOne();
 
-                //Once the messages are in the queue, an additional thread can be created to fetch them
-                new Thread(() => 
+                try
                 {
                     while (ClientSocket.IsConnected())
                     {
                         readerSignal.waitForSignal();
                         reader.processMsgs();
-                    }
-                }) { IsBackground = true }.Start();
 
-                /*************************************************************************************************************************************************/
-                /* One (although primitive) way of knowing if we can proceed is by monitoring the order's nextValidId reception which comes down automatically after connecting. */
-                /*************************************************************************************************************************************************/
-                while (NextOrderId <= 0) {await Task.Delay(1); }
-            }
-            catch(Exception ex)
-            {
-                error(ex.Message);
-            }
-            finally
-            {
-                SocketConnected_Event?.Invoke(this, new SocketConnected_EventArgs(ClientSocket.IsConnected()));
-            }
+                        // Just for testing catch inside this loop:
+                        //EReader reader2 = null;
+                        //reader2.processMsgs();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    error(ex.Message);
+                    error("A critical error occured. You need to restart the application!");
+                }
+                finally
+                {
+                    ClientSocket.Close();
+                }
+            }) { IsBackground = true }.Start();
         }
 
         public void CloseSocket()

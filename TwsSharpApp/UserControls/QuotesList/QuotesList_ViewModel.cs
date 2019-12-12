@@ -294,8 +294,11 @@ namespace TwsSharpApp
 
             lock (symbolsList_Lock)
             {
-                SymbolsList.Clear();
-                QuotesList.Clear();
+                dispatcher.Invoke(() =>
+                {
+                    SymbolsList.Clear();
+                    QuotesList.Clear();
+                });
             }
         }
     }
