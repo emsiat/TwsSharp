@@ -4,6 +4,7 @@
     <Style TargetType="{x:Type ListViewItem}">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment"   Value="Stretch"/>
+        <Setter Property="Padding"  Value="2"/>
         <Setter Property="Template" Value="{DynamicResource ListBoxItemControlTemplate1}"/>
     </Style>
 	
