@@ -35,13 +35,14 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="1" CornerRadius="2"  Margin="5,5" Background="Transparent">
+        <Border Grid.Row="1" CornerRadius="2"  Margin="5,5,5,0" Background="Transparent"
+                Visibility="{Binding IsFullScreen, Converter={StaticResource BoolNegatedToVisibility_Converter1}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="5s RealTime Quotes" Style="{DynamicResource TextBlockH1_Style}"/>
@@ -50,10 +51,16 @@
                         Style="{StaticResource ButtonToolbar_Style}" 
                         Command="{Binding ShowAddSymbolCommand}"/>
 
+                <Button Grid.Column="3" Background="Transparent" BorderThickness="0"
+                            Style="{StaticResource ButtonToolbar_Style}"
+                            FontFamily="Segoe MDL2 Assets"
+                            ToolTip="Full Screen Mode (F11)"
+                            Command="{Binding SetFullScreen_Command}"
+                    >&#xE740;</Button>
             </Grid>
         </Border>
 
-        <ListView x:Name="lvQuotes" Grid.Row="2" DataContext="{Binding}"
+        <ListView x:Name="lvQuotes" Grid.Row="2" Margin="0,5,0,0"  DataContext="{Binding}"
                   VerticalAlignment="Stretch"
                   ItemsSource="{Binding QuotesListView, UpdateSourceTrigger=PropertyChanged}" 
                   Width="{Binding ActualWidth, ElementName=gridMain, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -62,7 +69,6 @@
                   SizeChanged="lvQuotes_SizeChanged" 
                   ItemTemplate="{StaticResource QuoteItemTemplate}"
                   Opacity="{Binding AddSymbol_VM.IsVisible, Converter={StaticResource BoolToOpacity_Converter}}"
-                  
                   >
 
             <ListView.ItemsPanel>

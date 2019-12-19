@@ -209,7 +209,7 @@ namespace TwsSharpApp
         private bool isMouseOver = false;
         public  bool IsMouseOver
         {
-            get { return isMouseOver; }
+            get { return isMouseOver && !IsFullScreen; }
             set
             {
                 if (isMouseOver == value) return;

@@ -320,6 +320,7 @@
     <Compile Include="Infrastructure\Converters\BoolNegatedToVisibility_Converter.cs" />
     <Compile Include="Infrastructure\Converters\BoolToOpacity_Converter.cs" />
     <Compile Include="Infrastructure\Converters\BoolToVisibility_Converter.cs" />
+    <Compile Include="Infrastructure\Intefaces\IFullScreen.cs" />
     <Compile Include="Infrastructure\Mvvm\Workspace_ViewModel.cs" />
     <Compile Include="MainWindow\Main_View.xaml.cs">
       <DependentUpon>Main_View.xaml</DependentUpon>

@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Threading;
@@ -13,7 +12,7 @@ using TwsSharpApp.Data;
 
 namespace TwsSharpApp
 {
-    class QuotesList_ViewModel : Workspace_ViewModel
+    class QuotesList_ViewModel : Workspace_ViewModel, IFullScreen
     {
         public ListCollectionView QuotesListView { get; set; }
         public ObservableCollection<Quote_ViewModel> QuotesList { get; set; } = new ObservableCollection<Quote_ViewModel>();
@@ -73,6 +72,7 @@ namespace TwsSharpApp
         private void AddSymbol_VM_ContractSelected_Event(object sender, ContractDetailsRecv_EventArgs e)
         {
             addNew(e.ContractData);
+            ChangeDimensions(height, width);
         }
 
         private async void addNew(ContractDetails contractDetails, bool needsSaveToDB = true)
@@ -147,8 +147,6 @@ namespace TwsSharpApp
                 });
             }
 
-            ChangeDimensions(height, width);
-
             if(needsSaveToDB == true) symbVM.SaveToDB();
         }
 
@@ -189,19 +187,16 @@ namespace TwsSharpApp
 
         public void ChangeDimensions(double h, double w)
         {
-            if(h > height) itemWidth = maxWidth;
             height = h;
             width  = w;
-            
-            int slotsWidth  = (int)Math.Floor(width  / itemWidth); 
-            int slotsHeight = (int)Math.Floor(height / itemWidth);
 
-            while (QuotesList.Count > slotsWidth * slotsHeight)
-            {
-                itemWidth--;
-                slotsWidth  = (int)Math.Floor(width  / itemWidth); 
-                slotsHeight = (int)Math.Floor(height / itemWidth);
-            }  
+            if(QuotesList.Count == 0) return;
+
+            itemWidth = Math.Pow( h * w / QuotesList.Count, 0.5);
+
+            int slotsWidth = (int)Math.Ceiling(width / itemWidth) + 1;
+
+            itemWidth = width / slotsWidth -1 ;
 
             OnPropertyChanged(nameof(ItemWidth));
         }
@@ -244,11 +239,16 @@ namespace TwsSharpApp
 
             List<ContractData> cDataList = db.DisplayedContracts.ToList();
 
+            List<Task> tasks = new List<Task>();
+
             foreach (ContractData cData in cDataList)
             {
-                Thread t = new Thread(new ParameterizedThreadStart(addContractDetails));
-                t.Start(cData);
+                tasks.Add(Task.Run(() => addContractDetails(cData)));
             }
+
+            Task.WaitAll(tasks.ToArray());
+
+            ChangeDimensions(height, width);
         }
 
         public async void addContractDetails(object obj)
@@ -301,5 +301,22 @@ namespace TwsSharpApp
                 });
             }
         }
+
+        public void SetFullScreen(bool isfs)
+        {
+            IsFullScreen = isfs;
+            SymbolsList.Values.ToList().ForEach(q => { q.IsFullScreen = isfs; q.IsMouseOver = false; });
+        }
+
+        private RelayCommand setFullScreen_Command;
+        public  RelayCommand SetFullScreen_Command
+        {
+            get
+            {
+                return setFullScreen_Command ?? (setFullScreen_Command = new RelayCommand(param => this.InvokeFullScreen()));
+            }
+        }
+
+        
     }
 }

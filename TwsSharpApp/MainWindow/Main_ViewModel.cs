@@ -172,6 +172,8 @@ namespace TwsSharpApp
             CommandsCollection.MoveCurrentTo(tab);
         }
 
+        public object GetActiveTab => CommandsCollection.CurrentItem;
+
         private RelayCommand showSettings_Command;
         public  RelayCommand ShowSettings_Command
         {

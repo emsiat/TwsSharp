@@ -62,40 +62,22 @@ namespace TwsSharpApp
             }
         }
 
-        private int icon;
-        public  int Icon
+        private bool isFullScreen = false;
+        public  bool IsFullScreen
         {
-            get { return icon; }
+            get { return isFullScreen; }
             set
             {
-                if (icon == value) return;
-                icon = value;
-                OnPropertyChanged(nameof(Icon));
+                if (value == isFullScreen) return;
+                isFullScreen = value;
+                base.OnPropertyChanged(nameof(IsFullScreen));
             }
         }
 
-        private string category;
-        public  string Category
+        public static event EventHandler SetFullScreen_Event;
+        public void InvokeFullScreen()
         {
-            get { return category; }
-            set
-            {
-                if (category == value) return;
-                category = value;
-                OnPropertyChanged(nameof(Category));
-            }
-        }
-
-        private bool isLoading = true;
-        public  bool IsLoading
-        {
-            get { return isLoading; }
-            set
-            {
-                if (value == isLoading) return;
-                isLoading = value;
-                base.OnPropertyChanged(nameof(IsLoading));
-            }
+           SetFullScreen_Event?.Invoke(this, new EventArgs());
         }
     }
 }

@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Windows;
 
 namespace TwsSharpApp
 {
     class SettingsList_ViewModel : Workspace_ViewModel
     {
         private SettingsList settingsList = null;
-        private SettingsList prevList = null;
 
         public static string MyName = "Settings";
 

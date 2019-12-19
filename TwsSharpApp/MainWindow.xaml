@@ -5,10 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwsSharpApp"
         mc:Ignorable="d"
-        Title="TwsSharpApp" Height="450" Width="800" 
+        Title="TwsSharpApp" Height="Auto" Width="Auto" 
         MinWidth="800" MinHeight="450"
-        FontFamily="{DynamicResource Font_App}" FontSize="{DynamicResource FontSize_App}">
+        FontFamily="{DynamicResource Font_App}" FontSize="{DynamicResource FontSize_App}" 
+        Background="{StaticResource Main.Static.Background.Brush}"
+        KeyDown="Window_KeyDown" ShowActivated="False" Loaded="Window_Loaded">
 
-    <local:Main_View x:Name="mainViewControl" />
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:Main_ViewModel}">
+            <local:Main_View/>
+        </DataTemplate>
 
+        <DataTemplate DataType="{x:Type local:QuotesList_ViewModel}">
+            <local:QuotesList_View/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <ContentControl Content="{Binding}" 
+                        DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+    </Grid>
 </Window>
