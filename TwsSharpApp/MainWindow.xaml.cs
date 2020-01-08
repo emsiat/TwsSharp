@@ -18,7 +18,7 @@ namespace TwsSharpApp
             DB_ModelContainer db = new DB_ModelContainer();
             db.Database.Migrate();
 
-            mainViewModel = new Main_ViewModel(Dispatcher);
+            mainViewModel = new Main_ViewModel();
             DataContext = mainViewModel;
 
             Workspace_ViewModel.SetFullScreen_Event += VmFullScreen_SetFullScreen_Event;

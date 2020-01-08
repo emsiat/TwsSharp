@@ -335,11 +335,13 @@
       <DependentUpon>20191110071127_Added Settings table.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\DB_ModelContainerModelSnapshot.cs" />
+    <Compile Include="TwsExtensions\Events\StatisticsReset_EventArgs.cs" />
     <Compile Include="TwsExtensions\Events\RequestId_EventArgs.cs" />
     <Compile Include="TwsExtensions\Events\HistoricalBarRecv_EventArgs.cs" />
     <Compile Include="TwsExtensions\TwsData.cs" />
     <Compile Include="TwsExtensions\TwsWrapper.cs" />
     <Compile Include="UserControls\Contract\ContractDetails_ViewModel.cs" />
+    <Compile Include="UserControls\Contract\TradingHours.cs" />
     <Compile Include="UserControls\QuotesList\AddSymbol\AddSymbol_View.xaml.cs">
       <DependentUpon>AddSymbol_View.xaml</DependentUpon>
     </Compile>

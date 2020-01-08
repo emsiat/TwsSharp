@@ -1,5 +1,8 @@
 ﻿using IBApi;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,17 +13,80 @@ namespace TwsSharpApp
 {
     public class Quote_ViewModel : Workspace_ViewModel
     {
-        public string Symbol { get { return ContractDetails.Contract.Symbol; } }
+        public string Symbol { get { return ContractDetails.Symbol; } }
         public int ReqId { get; set; }
 
-        public ContractDetails ContractDetails { get; set; }
+        public ContractDetails_ViewModel ContractDetails { get; set; }
 
-        public Quote_ViewModel(int reqId, ContractDetails cDetails)
+        public Quote_ViewModel(int reqId, ContractDetails_ViewModel cDetails)
         {
             ReqId  = reqId;
             ContractDetails = cDetails;
             IsTabSelected = true;
         }
+
+        public bool SetClosedValues(List<Bar> closePricesList)
+        {
+            CultureInfo provider = CultureInfo.InvariantCulture;
+
+            DateTime timeClosed = DateTime.Now;
+
+            if (closePricesList.Count == 1)
+            {
+                PrevClose   = closePricesList[0].Open;
+                LowValue    = closePricesList[0].Low;
+                HighValue   = closePricesList[0].High;
+                LatestClose = closePricesList[0].Close;
+
+                timeClosed = DateTime.ParseExact(closePricesList[0].Time, "yyyyMMdd", provider);
+            }
+            else if (closePricesList.Count == 2)
+            {
+                PrevClose   = closePricesList[0].Close;
+                LowValue    = closePricesList[1].Low;
+                HighValue   = closePricesList[1].High;
+                LatestClose = closePricesList[1].Close;
+
+                timeClosed = DateTime.ParseExact(closePricesList[1].Time, "yyyyMMdd", provider);
+            }
+            else return false;
+
+            Time = timeClosed.ToShortDateString();
+            prevRealTime = timeClosed;
+            return true;
+        }
+
+        DateTime prevRealTime;
+
+        public void UpdateRealTimeData(Bar realtimeBar)
+        {
+            DateTime timeBar = DateTime.Parse(realtimeBar.Time);
+
+            if(prevRealTime <= ContractDetails.OpeningTime && timeBar > ContractDetails.OpeningTime)
+            {
+                Debug.WriteLine($"UpdateRealTimeData: {Symbol}, {lowValue}, {highValue}, {prevRealTime},  {timeBar}");
+                highValue = 0;
+                lowValue = double.MaxValue;
+                prevRealTime = timeBar;
+            }
+
+            LowValue  = realtimeBar.Low;
+            HighValue = realtimeBar.High;
+            Latest    = realtimeBar.Close;
+            Time      = timeBar.ToString("HH:mm:ss");
+        }
+
+        public void RenewPreviousClose()
+        {
+            //Debug.WriteLine("RenewPreviousClose " + DateTime.Now.ToString("h:mm:ss.fff") + " " + Symbol);
+
+            PrevClose = LatestClose;
+            IsDefined = false;
+
+            updateVariations();
+        }
+
+        public string UniqueName { get { return ContractDetails.UniqueName; } }
 
         private double prevClose = 0;
         public  double PrevClose
@@ -90,14 +156,19 @@ namespace TwsSharpApp
                 latest = value;
                 OnPropertyChanged(nameof(Latest));
 
-                IsDefined = !(double.IsNaN(latest));
-                
-                // Compute variations:
-                Var = latest - prevClose;
-                VarPercent = 100 * var / prevClose;
-
-                OnPropertyChanged(nameof(Background_TickVariation));
+                updateVariations();
             }
+        }
+
+        private void updateVariations()
+        {
+            IsDefined = !(double.IsNaN(latest));
+                
+            // Compute variations:
+            Var = latest - prevClose;
+            VarPercent = 100 * var / prevClose;
+
+            OnPropertyChanged(nameof(Background_TickVariation));
         }
 
         private bool isDefined = false;
@@ -111,7 +182,6 @@ namespace TwsSharpApp
                 OnPropertyChanged(nameof(IsDefined));
             }
         }
-
 
         private double var = 0;
         public  double Var

@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
 using TwsSharpApp.Data;
@@ -13,14 +14,13 @@ namespace TwsSharpApp
 {
     class AddSymbol_ViewModel : Base_ViewModel
     {
-        public Dispatcher         dispatcher { get; set; }
+        private Dispatcher dispatcher = Application.Current?.Dispatcher;
         public ListCollectionView Contracts_ListView { get; set; }
 
         public ObservableCollection<ContractDetails_ViewModel> Contracts_List { get; set; } = new ObservableCollection<ContractDetails_ViewModel>();
 
-        public AddSymbol_ViewModel(Dispatcher dspch)
+        public AddSymbol_ViewModel()
         {
-            dispatcher = dspch;
             Contracts_ListView = CollectionViewSource.GetDefaultView(this.Contracts_List) as ListCollectionView;
         }
 
@@ -69,13 +69,9 @@ namespace TwsSharpApp
         public int SelectedReqId { get; set; } = -1;
 
         private RelayCommand closeCommand;
-        public  RelayCommand CloseCommand
-        {
-            get
-            {
-                return closeCommand ?? (closeCommand = new RelayCommand(async param => await this.Close(), param => true));
-            }
-        }
+        public  RelayCommand CloseCommand => 
+                             closeCommand ?? (closeCommand = new RelayCommand(async param => await this.Close(), 
+                                                                                    param => true));
 
         private async Task Close()
         {
@@ -87,13 +83,9 @@ namespace TwsSharpApp
         }
 
         private RelayCommand startSearch_Command;
-        public  RelayCommand StartSearch_Command
-        {
-            get
-            {
-                return startSearch_Command ?? (startSearch_Command = new RelayCommand(async param => await this.StartSearch(param as string), param => true));
-            }
-        }
+        public  RelayCommand StartSearch_Command => 
+                             startSearch_Command ?? (startSearch_Command = new RelayCommand(async param => await this.StartSearch(param as string), 
+                                                                                                  param => true));
 
         private async Task StartSearch(string smb)
         {
@@ -103,14 +95,14 @@ namespace TwsSharpApp
             List<ContractDetails> contractDetailsList;
             
             if(string.IsNullOrEmpty(smb))
-                contractDetailsList = await TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = this.Symbol, SecType="STK"});
+                contractDetailsList = TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = this.Symbol, SecType="STK"});
             else
-                contractDetailsList = await TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = smb, SecType="STK"});
+                contractDetailsList = TwsData.DataFeeder.GetContractDetailsList(new ContractData(){Symbol = smb, SecType="STK"});
 
             foreach(ContractDetails cd in contractDetailsList)
             {
                 ContractDetails_ViewModel contractVM = new ContractDetails_ViewModel(cd);
-                dispatcher.Invoke(() => Contracts_List.Add(contractVM));
+                await dispatcher.InvokeAsync(() => Contracts_List.Add(contractVM));
 
                 contractVM.EndPriceUpdate_Event += ContractVM_EndPriceUpdate_Event;
 
@@ -125,13 +117,9 @@ namespace TwsSharpApp
         }
 
         private RelayCommand cancelSearch_Command;
-        public  RelayCommand CancelSearch_Command
-        {
-            get
-            {
-                return cancelSearch_Command ?? (cancelSearch_Command = new RelayCommand(async param => await this.CancelSearch(), param => true));
-            }
-        }
+        public  RelayCommand CancelSearch_Command => 
+                             cancelSearch_Command ?? (cancelSearch_Command = new RelayCommand(async param => await this.CancelSearch(), 
+                                                                                                    param => true));
 
         private async Task CancelSearch()
         {
@@ -145,13 +133,8 @@ namespace TwsSharpApp
         }
 
         private RelayCommand leftDoubleClick_Command;
-        public  RelayCommand LeftDoubleClick_Command
-        {
-            get
-            {
-                return leftDoubleClick_Command ?? (leftDoubleClick_Command = new RelayCommand(async param => await leftDoubleClicked()));
-            }
-        }
+        public  RelayCommand LeftDoubleClick_Command => 
+                             leftDoubleClick_Command ?? (leftDoubleClick_Command = new RelayCommand(async param => await leftDoubleClicked()));
 
         public  event EventHandler<ContractDetailsRecv_EventArgs> ContractSelected_Event;
 

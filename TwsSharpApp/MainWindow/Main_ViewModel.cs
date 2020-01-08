@@ -12,12 +12,11 @@ namespace TwsSharpApp
 {
     public class Main_ViewModel : Workspace_ViewModel
     {
-        private Dispatcher dispatcher;
+        private Dispatcher dispatcher = Application.Current?.Dispatcher;
         private SettingsList settingsList = null;
 
-        public Main_ViewModel(Dispatcher dspchr)
+        public Main_ViewModel()
         {
-            dispatcher  = dspchr;
             DisplayName = "TwsSharp";
         }
 
@@ -55,7 +54,7 @@ namespace TwsSharpApp
             }
             else
             {
-                dispatcher.Invoke(() =>
+                dispatcher.InvokeAsync(() =>
                 {
                     ShowSettings();
                 });
@@ -160,7 +159,7 @@ namespace TwsSharpApp
 
             if(tab == null)
             {
-                tab = QuotesList_ViewModel.CreateNew(dispatcher);
+                tab = QuotesList_ViewModel.Instance;
                 this.TabsCollection.Add(tab);
             }
 

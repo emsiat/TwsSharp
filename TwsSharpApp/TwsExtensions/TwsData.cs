@@ -1,9 +1,7 @@
 ﻿using IBApi;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using TwsSharpApp.Data;
 
 namespace TwsSharpApp
@@ -44,16 +42,16 @@ namespace TwsSharpApp
 
             void hErrorReceived(object sender, ErrorRecv_EventArgs e)
             {
-                if (e.Error.id == reqId)
+                if(e.Error.id != -1 && e.Error.id == reqId)
                 {
                     error = e.Error;
                     semaphore.Release();
                 }
             }
 
-            HistoricalBarReceived_Event  += hHistoricalBarReceived;
+            HistoricalBarReceived_Event     += hHistoricalBarReceived;
             HistoricalDataEndReceived_Event += hHistoricalDataReceived;
-            ErrorReceived_Event          += hErrorReceived;
+            ErrorReceived_Event             += hErrorReceived;
 
             reqId = RequestPreviousCloses(contract, days);
             RequestId_Event?.Invoke(contract, new RequestId_EventArgs(reqId));
@@ -61,14 +59,14 @@ namespace TwsSharpApp
             semaphore.WaitOne();
 
             HistoricalDataEndReceived_Event -= hHistoricalDataReceived;
-            HistoricalBarReceived_Event  -= hHistoricalBarReceived;
-            ErrorReceived_Event          -= hErrorReceived;
+            HistoricalBarReceived_Event     -= hHistoricalBarReceived;
+            ErrorReceived_Event             -= hErrorReceived;
 
             reTuple = new Tuple<List<Bar>, TwsError>(barsList, error);
             return reTuple;
         }
 
-        public async Task<List<ContractDetails>> GetContractDetailsList(ContractData cd)
+        public List<ContractDetails> GetContractDetailsList(ContractData cd)
         {
             Semaphore semaphore = new Semaphore(0, 1);
             List<ContractDetails> contractDetailsList = new List<ContractDetails>();
@@ -86,7 +84,10 @@ namespace TwsSharpApp
 
             void hErrorReceived(object sender, ErrorRecv_EventArgs e)
             {
-                if(e.Error.id == reqId) semaphore.Release();
+                if(e.Error.id != -1 && e.Error.id == reqId)
+                {
+                    semaphore.Release();
+                }
             }
 
             ContractDetailsReceived_Event    += hContractDetailsReceived;
@@ -101,7 +102,6 @@ namespace TwsSharpApp
             ContractDetailsEndReceived_Event -= hContractDetailsEndReceived;
             ErrorReceived_Event              -= hErrorReceived;
 
-            await Task.CompletedTask;
             return contractDetailsList;
         }
     }

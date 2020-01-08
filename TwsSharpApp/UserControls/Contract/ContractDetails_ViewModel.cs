@@ -1,6 +1,8 @@
 ﻿using IBApi;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace TwsSharpApp
@@ -87,6 +89,8 @@ namespace TwsSharpApp
             OnPropertyChanged(nameof(PriceStr));
         }
 
+        public Contract Contract => ContractDetails.Contract;
+
         public string PriceStr
         {
             get
@@ -117,6 +121,70 @@ namespace TwsSharpApp
             }
         }
 
+        public DateTime ResetVarsTime { get; private set; } = DateTime.MaxValue;
+        public DateTime OpeningTime   { get; private set; } = DateTime.MaxValue;
+        public DateTime ClosingTime   { get; private set; } = DateTime.MaxValue;
+
+        public void GetExchangesTimes()
+        {
+            string[] days = ContractDetails.LiquidHours.Split(';');
+            string strTimeZone = Regex.Match(ContractDetails.TimeZoneId, @"\(([^)]*)\)").Groups[1].Value;
+            TimeZoneInfo tst = TimeZoneInfo.FindSystemTimeZoneById(strTimeZone);
+
+            foreach(string day in days)
+            {
+                string[] hours = day.Split('-');
+                if(hours.Length == 1 && hours[0].Contains("CLOSED"))
+                {
+                    continue;
+                }
+                else if(hours.Length == 2)
+                {
+                    DateTime dtNow = DateTime.Now;
+                    
+                    CultureInfo provider = CultureInfo.InvariantCulture;
+
+                    if(OpeningTime == DateTime.MaxValue)
+                    {
+                        // OpeningTime has not been set yet.
+                        DateTime parsedOpeningTime  = DateTime.ParseExact(hours[0], "yyyyMMdd:HHmm", provider);
+                        parsedOpeningTime = TimeZoneInfo.ConvertTime(parsedOpeningTime, tst, TimeZoneInfo.Local);
+
+                        // Do not set OpeningTime if is in the past.
+                        // For example when we are during the trading hours, openingParsedTime is in the past. 
+                        if (DateTime.Now < parsedOpeningTime)
+                        {
+                            OpeningTime   = parsedOpeningTime;
+                            ResetVarsTime = OpeningTime.AddMinutes(-1 * TradingHours.ResetPeriodBeforeOpen);
+
+                            // For tests:
+                            //OpeningTime = DateTime.Now.AddSeconds(120);
+                            //ResetVarsTime = OpeningTime.AddMinutes(-1);
+                        }
+                    }
+
+                    if(ClosingTime == DateTime.MaxValue)
+                    {
+                        // ClosingTime has not been set yet.
+                        DateTime parsedClosingTime  = DateTime.ParseExact(hours[1], "yyyyMMdd:HHmm", provider);
+                        parsedClosingTime = TimeZoneInfo.ConvertTime(parsedClosingTime, tst, TimeZoneInfo.Local);
+
+                        if (DateTime.Now < parsedClosingTime)
+                        {
+                            ClosingTime = parsedClosingTime;
+                        }
+                    }
+                    //OpenTime = DateTime.Now.AddSeconds(60);
+
+                    // ClosingTime and OpeningTime has been set, do not look for anything else
+                    if ((ClosingTime != DateTime.MaxValue) && (OpeningTime != DateTime.MaxValue))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
         private string errorMsg = string.Empty;
         public string  ErrorMsg
         {
@@ -134,6 +202,9 @@ namespace TwsSharpApp
         {
             get { return string.IsNullOrEmpty(errorMsg) ? true : false; }
         }
+
+        public string Symbol     { get { return ContractDetails.Contract.Symbol; } }
+        public string UniqueName { get { return ContractDetails.Contract.Symbol + ContractDetails.Contract.SecType + ContractDetails.Contract.Exchange; } }
 
         public string Exchange    { get { return ContractDetails.Contract.Exchange; } }
         public string PrimaryExch { get { return ContractDetails.Contract.PrimaryExch; } }

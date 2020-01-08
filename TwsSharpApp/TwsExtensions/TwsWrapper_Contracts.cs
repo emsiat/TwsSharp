@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace TwsSharpApp
 {
@@ -14,17 +15,16 @@ namespace TwsSharpApp
         public event EventHandler<RequestId_EventArgs>           ContractDetailsEndReceived_Event;
         public event EventHandler<ContractDetailsRecv_EventArgs> ContractDetailsReceived_Event;
 
-        public int RequestContractDetails_Stock(string symbol)
-        {
-            int reqId = nextValidId();
-            ClientSocket.reqContractDetails(reqId, new Contract() { Symbol = symbol, SecType = "STK" });
-            return reqId;
-        }
-
         public int RequestContractDetails(Contract contract)
         {
             int reqId = nextValidId();
-            ClientSocket.reqContractDetails(reqId, contract);
+            lock(apiRequests_lock)
+            {
+                Thread.Sleep(20);
+                //Debug.WriteLine(reqId.ToString() + "-RequestContractDetails-" + DateTime.Now.ToString("h:mm:ss.fff") + " " + contract.Symbol);
+
+                ClientSocket.reqContractDetails(reqId, contract);
+            }
             return reqId;
         }
 

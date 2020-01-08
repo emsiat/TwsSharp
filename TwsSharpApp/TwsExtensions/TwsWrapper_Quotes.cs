@@ -1,6 +1,6 @@
 ﻿using IBApi;
 using System;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace TwsSharpApp
 {
@@ -30,15 +30,21 @@ namespace TwsSharpApp
         protected event EventHandler<RequestId_EventArgs>          HistoricalDataEndReceived_Event;
         protected event EventHandler<HistoricalBarRecv_EventArgs>  HistoricalBarReceived_Event;
 
+        private readonly object apiRequests_lock = new object();
         public int RequestPreviousCloses(Contract contract, int days)
         {
             string queryTime = DateTime.Now.ToString("yyyyMMdd HH:mm:ss");
 
             int reqId = nextValidId();
-            ClientSocket.reqHistoricalData(reqId, contract, queryTime,
-                                           days.ToString() + " D", "1 day", "TRADES",
-                                           (int)UseRegularTradingHours.Yes, 1, false, null);
+            lock(apiRequests_lock)
+            {
+                Thread.Sleep(20);
+                //Debug.WriteLine(reqId.ToString() + "-RequestPreviousCloses-" + DateTime.Now.ToString("h:mm:ss.fff") + " " + contract.Symbol);
 
+                ClientSocket.reqHistoricalData(reqId, contract, queryTime,
+                                               days.ToString() + " D", "1 day", "TRADES",
+                                               (int)UseRegularTradingHours.Yes, 1, false, null);
+            }
             return reqId;
         }
 
@@ -66,19 +72,25 @@ namespace TwsSharpApp
 
         public event EventHandler<RealtimeBarRecv_EventArgs> RealTimeDataReceived_Event;
 
-        public async Task<int> RequestRealTime(Contract contract)
+        public int RequestRealTime(Contract contract)
         {
             int reqId = nextValidId();
+            lock(apiRequests_lock)
+            {
+                Thread.Sleep(20);
+                //Debug.WriteLine(reqId.ToString() + "-RequestRealTime      -" + DateTime.Now.ToString("h:mm:ss.fff") + " " + contract.Symbol);
 
-            ClientSocket.reqRealTimeBars(reqId, contract, 1, "TRADES", true, null);
-            await Task.CompletedTask;
-
+                ClientSocket.reqRealTimeBars(reqId, contract, 1, "TRADES", true, null);
+            }
             return reqId;
         }
 
         public void CancelRealTime(int tickerId)
         {
-            ClientSocket.cancelRealTimeBars(tickerId);
+            lock(apiRequests_lock)
+            {
+                ClientSocket.cancelRealTimeBars(tickerId);
+            }
         }
 
         public void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)

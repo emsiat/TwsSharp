@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace TwsSharpApp
 {
@@ -18,7 +17,7 @@ namespace TwsSharpApp
         public virtual void error(Exception e)
         {
             Debug.WriteLine("Exception thrown: " + e);
-            throw e;
+            //throw e;
         }
 
         public virtual void currentTime(long time)
