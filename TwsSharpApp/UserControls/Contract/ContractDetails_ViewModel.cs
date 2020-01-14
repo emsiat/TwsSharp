@@ -26,6 +26,12 @@ namespace TwsSharpApp
         public ContractDetails_ViewModel(ContractDetails cd)
         {
             ContractDetails = cd;
+
+            // Get the openning and closing time from ContractDetails' liquid hours list
+            GetExchangesTimes();
+
+            // Add to the times list wich request reset statistics before
+            TradingHours.Instance.AddTime(this);
         }
 
         //

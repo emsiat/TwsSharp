@@ -74,7 +74,7 @@ namespace TwsSharpApp
 
             void hContractDetailsReceived(object sender, ContractDetailsRecv_EventArgs e)
             {
-                if(e.RequestId == reqId) contractDetailsList.Add(e.ContractData);
+                if(e.RequestId == reqId) contractDetailsList.Add(e.ContractDetails);
             }
 
             void hContractDetailsEndReceived(object sender, RequestId_EventArgs e)

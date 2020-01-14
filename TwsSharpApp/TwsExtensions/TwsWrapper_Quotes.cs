@@ -39,7 +39,6 @@ namespace TwsSharpApp
             lock(apiRequests_lock)
             {
                 Thread.Sleep(20);
-                //Debug.WriteLine(reqId.ToString() + "-RequestPreviousCloses-" + DateTime.Now.ToString("h:mm:ss.fff") + " " + contract.Symbol);
 
                 ClientSocket.reqHistoricalData(reqId, contract, queryTime,
                                                days.ToString() + " D", "1 day", "TRADES",

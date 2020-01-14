@@ -6,13 +6,13 @@ namespace TwsSharpApp
 {
     public class ContractDetailsRecv_EventArgs : EventArgs
     {
-        public ContractDetailsRecv_EventArgs(int requestId, ContractDetails contractDet)
+        public ContractDetailsRecv_EventArgs(int requestId, ContractDetails contractDetails)
         {
-            this.RequestId    = requestId;
-            this.ContractData = contractDet;
+            this.RequestId       = requestId;
+            this.ContractDetails = contractDetails;
         }
 
-        public int             RequestId    { get; private set; }
-        public ContractDetails ContractData { get; private set; }
+        public int             RequestId       { get; private set; }
+        public ContractDetails ContractDetails { get; private set; }
     }
 }

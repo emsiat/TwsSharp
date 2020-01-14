@@ -50,7 +50,7 @@ namespace TwsSharpApp
             if(e.IsConnected == true)
             {
                 // The Socket is connected, load the symbols from DB
-                QuotesList_ViewModel.Instance.LoadFromDB();
+                QuotesList_ViewModel.Instance.Start();
             }
             else
             {

@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
@@ -29,6 +30,10 @@ namespace TwsSharpApp
         private static QuotesList_ViewModel instance = null;
         public  static QuotesList_ViewModel Instance => instance ?? (instance = new QuotesList_ViewModel());
 
+        private PipelineStartup pipelineStartup;
+
+        private ActionBlock<Tuple<int, Bar>> processReceivedRT;
+
         private QuotesList_ViewModel()
         {
             DisplayName = MyName;
@@ -39,6 +44,8 @@ namespace TwsSharpApp
 
             IsTabSelected = true;
             CanClose = false;
+
+            pipelineStartup = new PipelineStartup();
 
             TwsData.DataFeeder.RealTimeDataReceived_Event += DataFeeder_RealTimeDataEndReceived_Event;
             TwsData.DataFeeder.ConnectionClosed_Event     += DataFeeder_ConnectionClosed_Event;
@@ -52,6 +59,134 @@ namespace TwsSharpApp
             TwsData.DataFeeder.RealTimeDataReceived_Event -= DataFeeder_RealTimeDataEndReceived_Event;
             AddSymbol_VM.ContractSelected_Event           -= AddSymbol_VM_ContractSelected_Event;
             TradingHours.StatisticsNeedReset_Event        -= TradingHours_StatisticsNeedReset_Event;
+        }
+
+        public void StartRealTime()
+        {
+            if (SynchronizationContext.Current == null)
+                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+
+            TaskScheduler CurrentTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            processReceivedRT = new ActionBlock<Tuple<int, Bar>>(input =>
+            {
+                int reqId = input.Item1;
+                Quote_ViewModel symbVM;
+
+                // Find the right symbol ViewModel, based from reqId
+                lock (symbolsList_Lock) 
+                {
+                    if (SymbolsList.ContainsKey(reqId))
+                        symbVM = SymbolsList[reqId];
+                    else
+                        return;
+                }
+                
+                // update with received Bar values:
+                symbVM.UpdateRealTimeData(input.Item2);
+            },
+            new ExecutionDataflowBlockOptions
+            {
+                //CancellationToken = cancellationSource.Token,
+                MaxDegreeOfParallelism = -1,
+                TaskScheduler = CurrentTaskScheduler
+            });
+        }
+
+        public async void Start(ContractData cd = null)
+        {
+            List<ContractData> cDataList;
+            Task rtTask;
+
+            if (cd == null)
+            {
+                DB_ModelContainer db = new DB_ModelContainer();
+                cDataList = db.DisplayedContracts.ToList();
+
+                // Create Real Time queue only once, 
+                rtTask = Task.Factory.StartNew(StartRealTime);
+            }
+            else
+            {
+                // Got only one contract data to add a symbol,
+                // possible source is AddSymbol_ViewModel:
+                cDataList = new List<ContractData>();
+                cDataList.Add(cd);
+            }
+
+            pipelineStartup.QuoteAdded            += PipelineStartup_AddQuote;
+            pipelineStartup.QuoteRemoved          += PipelineStartup_QuoteRemoved;
+            pipelineStartup.QuotesRealTimeStarted += PipelineStartup_QuotesRealTimeStarted;
+
+            await pipelineStartup.Run(cDataList);
+ 
+            ChangeDimensions(height, width);
+
+            pipelineStartup.QuoteAdded            -= PipelineStartup_AddQuote;
+            pipelineStartup.QuoteRemoved          -= PipelineStartup_QuoteRemoved;
+            pipelineStartup.QuotesRealTimeStarted -= PipelineStartup_QuotesRealTimeStarted;
+
+            //if (cd == null)
+            //{
+            //    System.Timers.Timer timer = new System.Timers.Timer();
+
+            //    timer.Elapsed += async (sender, e) => await TickTimer();
+            //    timer.AutoReset = true;
+            //    timer.Interval = 5000;
+            //    timer.Start();
+            //}
+        }
+
+        //private async Task TickTimer()
+        //{
+        //    try
+        //    {
+        //        foreach (var q in QuotesList)
+        //        {
+        //            await Task.Delay(1);
+        //            var rand = new Random((int)DateTime.UtcNow.Ticks);
+        //            double val = rand.NextDouble();
+        //            processReceivedRT.Post(new Tuple<int, Bar>(q.ReqId, new Bar(DateTime.Now.ToString("HH:mm:ss"),
+        //                q.Latest, q.HighValue, q.LowValue, q.Latest * (1 + (0.5 - val)), 0, 0, 0)));
+        //        }
+        //    }
+        //    catch (Exception) {}
+        //}
+
+        private async void PipelineStartup_QuoteRemoved(object sender, Quote_EventArgs e)
+        {
+            await dispatcher.InvokeAsync(() =>
+            {
+                QuotesList .Remove(e.Quote_VM);
+                SymbolsList.Remove(e.Quote_VM.ReqId);
+            });
+        }
+
+        private async void PipelineStartup_QuotesRealTimeStarted(object sender, Quote_EventArgs e)
+        {
+            await dispatcher.InvokeAsync(() =>
+            {
+                SymbolsList.Add(e.Quote_VM.ReqId, e.Quote_VM);
+            });
+        }
+
+        private async void PipelineStartup_AddQuote(object sender, Quote_EventArgs e)
+        {
+            await dispatcher.InvokeAsync(() =>
+            {
+                Quote_ViewModel qVM = QuotesList.FirstOrDefault(s => s.Symbol == e.Quote_VM.Symbol);
+
+                if (qVM != null)
+                {
+                    // We have to remove the already existing quote with the same symbol:
+                    QuotesList.Remove(qVM);
+                    if (SymbolsList.ContainsKey(qVM.ReqId))
+                    {
+                        SymbolsList.Remove(qVM.ReqId);
+                    }
+                }
+                QuotesList.Add(e.Quote_VM);
+            });
         }
 
         private void TradingHours_StatisticsNeedReset_Event(object sender, StatisticsReset_EventArgs e)
@@ -81,75 +216,14 @@ namespace TwsSharpApp
         // Called from AddSymbol_ViewModel when a contract was selected from list, will add it to the listview
         // then will subscribe to receive TWS real time (5s) data.
         //
-        private void AddSymbol_VM_ContractSelected_Event(object sender, ContractDetailsRecv_EventArgs e)
+        private async void AddSymbol_VM_ContractSelected_Event(object sender, ContractDetailsRecv_EventArgs e)
         {
-            addNew(e.ContractData);
-            ChangeDimensions(height, width);
-        }
+            ContractData cd = new ContractData(e.ContractDetails.Contract);
+            Start(cd);
 
-        private void addNew(ContractDetails contractDetails, bool needsSaveToDB = true)
-        {
-            Quote_ViewModel symVM = null;
-            ContractDetails_ViewModel cd_vm = new ContractDetails_ViewModel(contractDetails);
-
-            lock (symbolsList_Lock)
-            {
-                // Get the openning and closing time from ContractDetails' liquid hours list
-                cd_vm.GetExchangesTimes();
-
-                // Add to the times list wich request reset statistics before
-                TradingHours.Instance.AddTime(cd_vm);
-
-                symVM = QuotesList.FirstOrDefault(s => s.Symbol == contractDetails.Contract.Symbol);
-                if(symVM != null)
-                {
-                    // Little prob to find a symbol previously added to the list:
-                    // First cancel the old:
-                    TwsData.DataFeeder.CancelRealTime(symVM.ReqId);
- 
-                    // then remove it from list
-                    dispatcher.InvokeAsync(() =>
-                    {
-                        QuotesList .Remove(symVM);
-                        SymbolsList.Remove(symVM.ReqId);
-                    });
-                }
-            }
-         
-            UpdateClosePrices(cd_vm, needsSaveToDB);
-        }
-
-        private void UpdateClosePrices(ContractDetails_ViewModel contractDetails, bool needsSaveToDB = true)
-        {
-            List<Bar> closePricesList = null;
-
-            Tuple<List<Bar>, TwsError> tuple = TwsData.DataFeeder.GetPreviousCloses(contractDetails.Contract, 2);
-
-            closePricesList = tuple.Item1;
-
-            // Historical data list is empty, just return:
-            if (closePricesList == null || closePricesList.Count == 0) return;
-
-            // send real time request for symbol: 
-            int reqId = TwsData.DataFeeder.RequestRealTime(contractDetails.Contract); 
-
-            Quote_ViewModel symbVM = new Quote_ViewModel(reqId, contractDetails);
-            if (symbVM == null) return;
-
-            // Update the previous and last closes values and times:
-            if (symbVM.SetClosedValues(closePricesList) == false)
-                return;
-
-            lock (symbolsList_Lock)
-            {
-                dispatcher.InvokeAsync(() =>
-                {
-                    QuotesList .Add(symbVM);
-                    SymbolsList.Add(reqId, symbVM);
-                });
-            }
-
-            if(needsSaveToDB == true) symbVM.SaveToDB();
+            DB_ModelContainer db = new DB_ModelContainer();
+            db.DisplayedContracts.Add(cd);
+            await db.SaveChangesAsync();
         }
 
         //
@@ -158,14 +232,7 @@ namespace TwsSharpApp
         private void DataFeeder_RealTimeDataEndReceived_Event(object sender, RealtimeBarRecv_EventArgs e)
         {
             // a real time bar has been received:
-            int reqId = e.RequestId;
-            Quote_ViewModel symbVM;
-            
-            // Find the right symbol ViewModel, based from reqId
-            lock(symbolsList_Lock) { symbVM = SymbolsList[reqId]; }
-
-            // update with received Bar values:
-            symbVM.UpdateRealTimeData(e.RealtimeBar);
+            processReceivedRT.Post(new Tuple<int, Bar>(e.RequestId, e.RealtimeBar));
         }
 
         private double itemWidth = 0;
@@ -217,38 +284,6 @@ namespace TwsSharpApp
         private void ShowAddSymbol()
         {
             AddSymbol_VM.IsVisible = true;
-        }
-
-        public async void LoadFromDB()
-        {
-            DB_ModelContainer  db        = new DB_ModelContainer();
-            List<ContractData> cDataList = db.DisplayedContracts.ToList();
-            List<Task>         tasks     = new List<Task>();
-            
-            cDataList.ForEach(cData => tasks.Add(Task.Factory.StartNew(() => { addContractDetails(cData); })));
-            await Task.WhenAll(tasks);
-
-            await dispatcher.InvokeAsync(() =>
-            {
-                TwsData.DataFeeder.error("No. of symbols added to display list: " + QuotesList.Count.ToString());
-            });
-
-
-            ChangeDimensions(height, width);
-        }
-
-        public void addContractDetails(object obj)
-        {
-            // return if obj is not ContractData
-            if(!(obj is ContractData cData)) return;
-
-            // Get a list of contracts details using the ContactData cData:
-            List<ContractDetails> contractDetailsList = TwsData.DataFeeder.GetContractDetailsList(cData);
-
-            if ((contractDetailsList is null) || (contractDetailsList.Count == 0)) return;
-            
-            // It should be only one:
-            addNew(contractDetailsList[0], false);
         }
         
         private void Quote_ViewModel_ContractRemoved_Event(object sender, EventArgs e)

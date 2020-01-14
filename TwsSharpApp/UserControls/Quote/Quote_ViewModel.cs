@@ -25,7 +25,7 @@ namespace TwsSharpApp
             IsTabSelected = true;
         }
 
-        public bool SetClosedValues(List<Bar> closePricesList)
+        public void SetClosedValues(List<Bar> closePricesList)
         {
             CultureInfo provider = CultureInfo.InvariantCulture;
 
@@ -49,11 +49,9 @@ namespace TwsSharpApp
 
                 timeClosed = DateTime.ParseExact(closePricesList[1].Time, "yyyyMMdd", provider);
             }
-            else return false;
 
             Time = timeClosed.ToShortDateString();
             prevRealTime = timeClosed;
-            return true;
         }
 
         DateTime prevRealTime;
